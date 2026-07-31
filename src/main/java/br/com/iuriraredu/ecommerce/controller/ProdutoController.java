@@ -2,6 +2,7 @@ package br.com.iuriraredu.ecommerce.controller;
 
 import br.com.iuriraredu.ecommerce.entity.Produto;
 import br.com.iuriraredu.ecommerce.repository.ProdutoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,16 +18,17 @@ import java.util.List;
 
 @RestController // Diz que esta classe vai responder requisições da web (e devolver JSON).
 @RequestMapping("/produtos") // Define que a URL base para esta classe será localhost:8080/produtos
+@RequiredArgsConstructor
 public class ProdutoController {
 
-    @Autowired // Injeta (traz) o nosso ProdutoRepository para usarmos aqui dentro.
-    private ProdutoRepository repository;
+    private final ProdutoRepository repository;
 
     // 1. CADASTRAR PRODUTO (POST localhost:8080/produtos)
     @PostMapping
-    public Produto criar(@RequestBody Produto produto) {
+    public ResponseEntity<Produto> criar(@RequestBody Produto produto) {
         // @RequestBody avisa que os dados do produto virão no "corpo" da requisição em formato JSON.
-        return repository.save(produto);
+        Produto produtoSalvo =  repository.save(produto);
+        return ResponseEntity.status(201).body(produtoSalvo);
     }
 
     // 2. LISTAR TODOS (GET localhost:8080/produtos)

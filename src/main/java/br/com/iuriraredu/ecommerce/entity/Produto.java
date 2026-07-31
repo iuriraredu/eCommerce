@@ -7,7 +7,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-import static jakarta.persistence.GenerationType.*;
+import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data // O Lombok cria os Getters, Setters e o toString automaticamente, limpando o código.
 @Entity // Avisa ao banco de dados: "Crie uma tabela para esta classe".
