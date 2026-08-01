@@ -3,7 +3,6 @@ package br.com.iuriraredu.ecommerce.controller;
 import br.com.iuriraredu.ecommerce.entity.Produto;
 import br.com.iuriraredu.ecommerce.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
