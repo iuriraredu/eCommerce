@@ -1,7 +1,7 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Produto;
-import br.com.iuriraredu.ecommerce.service.ProdutoService;
+import br.com.iuriraredu.ecommerce.entity.Cliente;
+import br.com.iuriraredu.ecommerce.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,33 +18,32 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/produtos")
+@RequestMapping("/clientes")
 @RequiredArgsConstructor
-public class ProdutoController {
-
-    private final ProdutoService service;
+public class ClienteController {
+    private final ClienteService service;
 
     @PostMapping
-    public ResponseEntity<Produto> criar(@RequestBody Produto produto) {
-        Produto produtoCriado = service.criar(produto);
-        return ResponseEntity.status(CREATED).body(produtoCriado);
+    public ResponseEntity<Cliente> criar(@RequestBody Cliente cliente) {
+        Cliente clienteSalvo = service.criar(cliente);
+        return ResponseEntity.status(CREATED).body(clienteSalvo);
     }
 
     @GetMapping
-    public List<Produto> listarTodos() {
+    public List<Cliente> listarTodos() {
         return service.listarTodos();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody Produto produtoAtualizado) {
-        return service.atualizar(id, produtoAtualizado)
+    public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @RequestBody Cliente cliente) {
+        return service.atualizar(id, cliente)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
