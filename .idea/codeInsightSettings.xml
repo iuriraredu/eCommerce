@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaProjectCodeInsightSettings">
+    <included-static-names>
+      <name>br.com.iuriraredu.ecommerce.entity.emuns.StatusPedido</name>
+      <name>jakarta.persistence.CascadeType</name>
+      <name>-jakarta.persistence.CascadeType.ALL</name>
+    </included-static-names>
+  </component>
+</project>

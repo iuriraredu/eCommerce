@@ -50,8 +50,10 @@ public class ClienteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        return service.deletar(id) ?
-                ResponseEntity.noContent().build() :
-                ResponseEntity.notFound().build();
+        return service.deletar(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 }
+
+

@@ -15,6 +15,12 @@ public class ClienteService {
     private final ClienteRepository repository;
 
     public Cliente criar(Cliente cliente) {
+        if (cliente.getEnderecos() != null)
+            cliente.getEnderecos().forEach(endereco -> endereco.setCliente(cliente));
+
+        if (cliente.getTelefones() != null)
+            cliente.getTelefones().forEach(telefone -> telefone.setCliente(cliente));
+
         return repository.save(cliente);
     }
 

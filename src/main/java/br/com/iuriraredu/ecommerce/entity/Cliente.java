@@ -3,8 +3,12 @@ package br.com.iuriraredu.ecommerce.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 
+import java.util.List;
+
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
@@ -13,8 +17,16 @@ public class Cliente {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+
     private String nome;
     private String email;
     private String cpf;
-}
 
+    // Um cliente tem muitos Endereços
+    @OneToMany(mappedBy = "cliente", cascade = ALL, orphanRemoval = true)
+    private List<Endereco> enderecos;
+
+    // Um cliente tem muitos Telefones
+    @OneToMany(mappedBy = "cliente", cascade = ALL, orphanRemoval = true)
+    private List<Telefone> telefones;
+}
