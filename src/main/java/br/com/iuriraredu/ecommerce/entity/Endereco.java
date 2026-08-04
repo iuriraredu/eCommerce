@@ -21,7 +21,6 @@ public class Endereco {
     private String bairro;
     private String cep;
 
-    // Relacionamento: Muitos endereços podem pertencer a Um cliente
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;

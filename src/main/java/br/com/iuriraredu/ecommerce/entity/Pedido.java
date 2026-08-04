@@ -25,18 +25,13 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-
     private LocalDateTime dataPedido = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     private StatusPedido status = AGUARDANDO_PAGAMENTO;
-
-    // Fotografia dos dados do cliente no momento da compra
     private String documentoClienteSnapshot;
     private String enderecoEntregaSnapshot;
 
-    // TRUQUE DE MESTRE: @Transient faz o JPA ignorar esse campo na hora de criar a tabela.
-    // Usamos isso só para receber o ID do endereço pelo JSON do Postman/Front-end!
     @Transient
     private Long idEnderecoEntrega;
 

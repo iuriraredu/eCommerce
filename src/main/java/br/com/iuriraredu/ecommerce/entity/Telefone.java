@@ -15,10 +15,8 @@ public class Telefone {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-
     private String numero;
 
-    // Relacionamento: Muitos telefones podem pertencer a Um cliente
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;

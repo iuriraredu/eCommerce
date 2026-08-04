@@ -22,11 +22,9 @@ public class Cliente {
     private String email;
     private String cpf;
 
-    // Um cliente tem muitos Endereços
     @OneToMany(mappedBy = "cliente", cascade = ALL, orphanRemoval = true)
     private List<Endereco> enderecos;
 
-    // Um cliente tem muitos Telefones
     @OneToMany(mappedBy = "cliente", cascade = ALL, orphanRemoval = true)
     private List<Telefone> telefones;
 }

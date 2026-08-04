@@ -25,24 +25,18 @@ public class PedidoService {
     private final ClienteRepository clienteRepository;
 
     public Pedido criar(Pedido pedido) {
-
-        // 1. BUSCAR O CLIENTE
         Cliente cliente = clienteRepository.findById(pedido.getCliente().getId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado!"));
 
         pedido.setCliente(cliente);
         pedido.setDocumentoClienteSnapshot(cliente.getCpf());
 
-        // 2. LÓGICA DE SNAPSHOT DO ENDEREÇO
         if (cliente.getEnderecos() != null && !cliente.getEnderecos().isEmpty()) {
-
-            // Tenta encontrar o endereço pelo ID enviado no JSON. Se não vier ID, pega o primeiro da lista.
             Endereco enderecoEscolhido = cliente.getEnderecos().stream()
                     .filter(end -> end.getId().equals(pedido.getIdEnderecoEntrega()))
                     .findFirst()
                     .orElse(cliente.getEnderecos().getFirst());
 
-            // Monta o texto do Snapshot (ex: "Rua X, 123 - Centro, CEP: 00000-000")
             String snapshot = String.format(
                     "%s, %s - %s, CEP: %s%s",
                     enderecoEscolhido.getLogradouro(),
@@ -59,7 +53,6 @@ public class PedidoService {
             pedido.setEnderecoEntregaSnapshot("Cliente sem endereço cadastrado");
         }
 
-        // 3. PROCESSAR OS ITENS E CONGELAR O PREÇO
         for (ItemPedido item : pedido.getItens()) {
             Produto produto = produtoRepository.findById(item.getProduto().getId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado!"));
@@ -69,7 +62,6 @@ public class PedidoService {
             item.setPedido(pedido);
         }
 
-        // 4. SALVAR TUDO
         return pedidoRepository.save(pedido);
     }
 
@@ -78,15 +70,10 @@ public class PedidoService {
     }
 
     public Optional<Pedido> atualizarStatus(Long id, StatusPedido novoStatus) {
-// 1. Busca o pedido existente no banco
         Optional<Pedido> pedidoOpt = pedidoRepository.findById(id);
 
-        // 2. Se não achar, retorna vazio
-        if (pedidoOpt.isEmpty()) {
-            return Optional.empty();
-        }
+        if (pedidoOpt.isEmpty()) return Optional.empty();
 
-        // 3. Se achar, pega o pedido, atualiza o status e salva
         Pedido pedido = pedidoOpt.get();
         pedido.setStatus(novoStatus);
 
