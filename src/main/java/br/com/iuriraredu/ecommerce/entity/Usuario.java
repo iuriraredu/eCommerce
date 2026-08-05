@@ -26,7 +26,6 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    // O login precisa ser único no banco (não podem existir dois iguais)
     @Column(unique = true, nullable = false)
     private String login;
 
@@ -36,9 +35,6 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role = USER;
 
-    // --- MÉTODOS OBRIGATÓRIOS DO SPRING SECURITY ---
-
-    // Define qual o nível de acesso (role) desse usuário
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return (this.role == ADMIN)
@@ -46,19 +42,16 @@ public class Usuario implements UserDetails {
                 : List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
-    // O Spring precisa saber qual campo é a "senha"
     @Override
     public String getPassword() {
         return this.password;
     }
 
-    // O Spring precisa saber qual campo é o "login"
     @Override
     public String getUsername() {
         return this.login;
     }
 
-    // As validações abaixo bloqueiam a conta se quisermos. Por padrão, deixamos tudo 'true' (ativo).
     @Override
     public boolean isAccountNonExpired() {
         return true;
