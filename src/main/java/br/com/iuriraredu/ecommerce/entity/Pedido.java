@@ -1,6 +1,6 @@
 package br.com.iuriraredu.ecommerce.entity;
 
-import br.com.iuriraredu.ecommerce.entity.emuns.StatusPedido;
+import br.com.iuriraredu.ecommerce.entity.enums.StatusPedido;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,7 +15,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static br.com.iuriraredu.ecommerce.entity.emuns.StatusPedido.AGUARDANDO_PAGAMENTO;
+import static br.com.iuriraredu.ecommerce.entity.enums.StatusPedido.AGUARDANDO_PAGAMENTO;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.GenerationType.IDENTITY;
 

@@ -6,7 +6,7 @@ import br.com.iuriraredu.ecommerce.entity.Endereco;
 import br.com.iuriraredu.ecommerce.entity.ItemPedido;
 import br.com.iuriraredu.ecommerce.entity.Pedido;
 import br.com.iuriraredu.ecommerce.entity.Produto;
-import br.com.iuriraredu.ecommerce.entity.emuns.StatusPedido;
+import br.com.iuriraredu.ecommerce.entity.enums.StatusPedido;
 import br.com.iuriraredu.ecommerce.repository.ClienteRepository;
 import br.com.iuriraredu.ecommerce.repository.PedidoRepository;
 import br.com.iuriraredu.ecommerce.repository.ProdutoRepository;

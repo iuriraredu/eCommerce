@@ -1,7 +1,7 @@
 package br.com.iuriraredu.ecommerce.controller;
 
 import br.com.iuriraredu.ecommerce.entity.Pedido;
-import br.com.iuriraredu.ecommerce.entity.emuns.StatusPedido;
+import br.com.iuriraredu.ecommerce.entity.enums.StatusPedido;
 import br.com.iuriraredu.ecommerce.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
