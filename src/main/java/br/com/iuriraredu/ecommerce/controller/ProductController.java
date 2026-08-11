@@ -1,7 +1,7 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Produto;
-import br.com.iuriraredu.ecommerce.service.ProdutoService;
+import br.com.iuriraredu.ecommerce.entity.Product;
+import br.com.iuriraredu.ecommerce.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,40 +18,40 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/produtos")
+@RequestMapping("/products")
 @RequiredArgsConstructor
-public class ProdutoController {
+public class ProductController {
 
-    private final ProdutoService service;
+    private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<Produto> criar(@RequestBody Produto produto) {
-        Produto produtoCriado = service.criar(produto);
-        return ResponseEntity.status(CREATED).body(produtoCriado);
+    public ResponseEntity<Product> create(@RequestBody Product product) {
+        Product createdProduct = productService.create(product);
+        return ResponseEntity.status(CREATED).body(createdProduct);
     }
 
     @GetMapping
-    public List<Produto> listarTodos() {
-        return service.listarTodos();
+    public List<Product> getAll() {
+        return productService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id)
+    public ResponseEntity<Product> findById(@PathVariable Long id) {
+        return productService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody Produto produtoAtualizado) {
-        return service.atualizar(id, produtoAtualizado)
+    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product updatedProduct) {
+        return productService.update(id, updatedProduct)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        return service.deletar(id) ?
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        return productService.delete(id) ?
                 ResponseEntity.noContent().build() :
                 ResponseEntity.notFound().build();
     }

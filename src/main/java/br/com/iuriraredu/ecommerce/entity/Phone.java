@@ -11,14 +11,15 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
 @Entity
-public class Telefone {
+public class Phone {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-    private String numero;
+
+    private String number;
 
     @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
+    @JoinColumn(name = "client_id")
+    private Client client;
 }
 

@@ -1,8 +1,7 @@
 package br.com.iuriraredu.ecommerce.entity;
 
-import br.com.iuriraredu.ecommerce.entity.enums.TipoPagamento;
+import br.com.iuriraredu.ecommerce.entity.enums.PaymentType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -13,22 +12,23 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
 @Entity
-public class Pagamento {
+public class Payment {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    private BigDecimal valorPago;
-    private LocalDateTime dataConfirmacao;
+    private BigDecimal paidAmount;
+    private LocalDateTime confirmationDate;
 
-    @Enumerated(EnumType.STRING)
-    private TipoPagamento tipoPagamento;
+    @Enumerated(STRING)
+    private PaymentType paymentType;
 
     @OneToOne
-    @JoinColumn(name = "pedido_id")
-    private Pedido pedido;
+    @JoinColumn(name = "order_id")
+    private Order order;
 }

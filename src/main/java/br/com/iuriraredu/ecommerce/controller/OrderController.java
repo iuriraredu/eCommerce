@@ -1,8 +1,8 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Pedido;
-import br.com.iuriraredu.ecommerce.entity.enums.StatusPedido;
-import br.com.iuriraredu.ecommerce.service.PedidoService;
+import br.com.iuriraredu.ecommerce.entity.Order;
+import br.com.iuriraredu.ecommerce.entity.enums.OrderStatus;
+import br.com.iuriraredu.ecommerce.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,25 +18,25 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/pedidos")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
-public class PedidoController {
-    private final PedidoService service;
+public class OrderController {
+    private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Pedido> criar(@RequestBody Pedido pedido) {
-        Pedido pedidoCriado = service.criar(pedido);
-        return ResponseEntity.status(CREATED).body(pedidoCriado);
+    public ResponseEntity<Order> create(@RequestBody Order order) {
+        Order createdOrder = orderService.create(order);
+        return ResponseEntity.status(CREATED).body(createdOrder);
     }
 
     @GetMapping
-    public List<Pedido> listarTodos() {
-        return service.listarTodos();
+    public List<Order> getAll() {
+        return orderService.getAll();
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Pedido> atualizarStatus(@PathVariable Long id, @RequestBody StatusPedido novoStatus) {
-        return service.atualizarStatus(id, novoStatus)
+    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
+        return orderService.updateStatus(id, newStatus)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

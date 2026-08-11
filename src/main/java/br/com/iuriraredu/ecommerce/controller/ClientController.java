@@ -1,7 +1,7 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Cliente;
-import br.com.iuriraredu.ecommerce.service.ClienteService;
+import br.com.iuriraredu.ecommerce.entity.Client;
+import br.com.iuriraredu.ecommerce.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,42 +18,40 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/clientes")
+@RequestMapping("/clients")
 @RequiredArgsConstructor
-public class ClienteController {
-    private final ClienteService service;
+public class ClientController {
+    private final ClientService service;
 
     @PostMapping
-    public ResponseEntity<Cliente> criar(@RequestBody Cliente cliente) {
-        Cliente clienteSalvo = service.criar(cliente);
-        return ResponseEntity.status(CREATED).body(clienteSalvo);
+    public ResponseEntity<Client> create(@RequestBody Client client) {
+        Client savedClient = service.create(client);
+        return ResponseEntity.status(CREATED).body(savedClient);
     }
 
     @GetMapping
-    public List<Cliente> listarTodos() {
-        return service.listarTodos();
+    public List<Client> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id)
+    public ResponseEntity<Client> findById(@PathVariable Long id) {
+        return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @RequestBody Cliente cliente) {
-        return service.atualizar(id, cliente)
+    public ResponseEntity<Client> update(@PathVariable Long id, @RequestBody Client client) {
+        return service.update(id, client)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        return service.deletar(id)
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        return service.delete(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
 }
-
-

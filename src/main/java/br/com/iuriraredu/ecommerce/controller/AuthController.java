@@ -1,15 +1,11 @@
 package br.com.iuriraredu.ecommerce.controller;
 
 import br.com.iuriraredu.ecommerce.dto.AuthenticationDTO;
+import br.com.iuriraredu.ecommerce.dto.LoginResponseDTO;
 import br.com.iuriraredu.ecommerce.dto.RegisterDTO;
-import br.com.iuriraredu.ecommerce.entity.Usuario;
-import br.com.iuriraredu.ecommerce.repository.UsuarioRepository;
+import br.com.iuriraredu.ecommerce.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,33 +17,21 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
-    private final UsuarioRepository usuarioRepository;
+
+    private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthenticationDTO data) {
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(
-                data.login(), data.password());
-
-        Authentication auth = this.authenticationManager.authenticate(usernamePassword);
-
-        return ResponseEntity.ok("Login efetuado com sucesso! (O Token JWT será implementado na V5)");
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO data) {
+        LoginResponseDTO response = authService.login(data);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/registrar")
-    public ResponseEntity<Void> registrar(@RequestBody RegisterDTO data) {
-        if (this.usuarioRepository.findByLogin(data.login()) != null) {
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@RequestBody RegisterDTO data) {
+        boolean success = authService.register(data);
+        if (!success) {
             return ResponseEntity.badRequest().build();
         }
-
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        Usuario usuario = new Usuario();
-        usuario.setLogin(data.login());
-        usuario.setPassword(encryptedPassword);
-        usuario.setRole(data.role());
-
-        this.usuarioRepository.save(usuario);
-
         return ResponseEntity.status(CREATED).build();
     }
 }

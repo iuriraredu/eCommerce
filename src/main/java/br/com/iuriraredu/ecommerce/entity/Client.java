@@ -13,18 +13,18 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
 @Entity
-public class Cliente {
+public class Client {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    private String nome;
+    private String name;
     private String email;
     private String cpf;
 
-    @OneToMany(mappedBy = "cliente", cascade = ALL, orphanRemoval = true)
-    private List<Endereco> enderecos;
+    @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
+    private List<Address> addresses;
 
-    @OneToMany(mappedBy = "cliente", cascade = ALL, orphanRemoval = true)
-    private List<Telefone> telefones;
+    @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
+    private List<Phone> phones;
 }

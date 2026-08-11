@@ -11,13 +11,14 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
 @Entity
-public class Produto {
+public class Product {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-    private String nome;
-    private String descricao;
-    private BigDecimal preco;
+
+    private String name;
+    private String description;
+    private BigDecimal price;
 }
 
 

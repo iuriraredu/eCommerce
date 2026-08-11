@@ -1,9 +1,9 @@
 package br.com.iuriraredu.ecommerce.repository;
 
-import br.com.iuriraredu.ecommerce.entity.ItemPedido;
+import br.com.iuriraredu.ecommerce.entity.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ItemPedidoRepository extends JpaRepository<ItemPedido, Long> {
+public interface ClientRepository extends JpaRepository<Client, Long> {
 }
