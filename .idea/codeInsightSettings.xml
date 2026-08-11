@@ -7,6 +7,8 @@
       <name>-jakarta.persistence.CascadeType.ALL</name>
       <name>jakarta.persistence.GenerationType</name>
       <name>br.com.iuriraredu.ecommerce.entity.emuns.UserRole</name>
+      <name>org.junit.jupiter.api.Assertions</name>
+      <name>org.mockito.Mockito</name>
     </included-static-names>
   </component>
 </project>
