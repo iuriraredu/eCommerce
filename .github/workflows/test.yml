@@ -15,14 +15,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Configura o ambiente Java (ajuste a versão se estiver usando a 17 ou 21)
-      - name: Set up JDK 17
+      # 2. Configura o ambiente Java 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           cache: maven
 
-      # 3. Dá permissão de execução ao mvnw (caso use Maven Wrapper) ou roda direto via maven
+      # 3. Executa os testes com Maven
       - name: Run Unit Tests with Maven
         run: mvn clean test
