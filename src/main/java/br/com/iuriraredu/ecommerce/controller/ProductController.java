@@ -2,6 +2,9 @@ package br.com.iuriraredu.ecommerce.controller;
 
 import br.com.iuriraredu.ecommerce.entity.Product;
 import br.com.iuriraredu.ecommerce.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,17 +23,29 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@Tag(name = "Produtos", description = "Gerenciamento de produtos do catálogo (Cadastro, Consulta, Atualização e Exclusão)")
 public class ProductController {
 
     private final ProductService productService;
 
     @PostMapping
+    @Operation(
+            summary = "Cadastrar novo produto",
+            description = "Cria um novo produto no estoque utilizando os dados fornecidos no corpo da requisição e retorna o produto recém-criado com seu ID gerado."
+    )
+    @ApiResponse(responseCode = "201", description = "Produto cadastrado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para o cadastro do produto")
     public ResponseEntity<Product> create(@RequestBody Product product) {
         Product createdProduct = productService.create(product);
         return ResponseEntity.status(CREATED).body(createdProduct);
     }
 
     @GetMapping
+    @Operation(
+            summary = "Listar todos os produtos",
+            description = "Retorna uma lista contendo todos os produtos cadastrados atualmente no sistema."
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de produtos retornada com sucesso")
     public List<Product> getAll() {
         return productService.getAll();
     }
@@ -41,11 +56,22 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @Operation(
+            summary = "Buscar produto por ID",
+            description = "Retorna os detalhes de um produto específico com base no ID informado na URL."
+    )
+    @ApiResponse(responseCode = "200", description = "Produto encontrado com sucesso")
+    @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
     public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product updatedProduct) {
         return ResponseEntity.ok(productService.update(id, updatedProduct));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}")@Operation(
+            summary = "Deletar produto",
+            description = "Remove um produto do sistema com base no ID informado na URL. Retorna status sem conteúdo em caso de sucesso."
+    )
+    @ApiResponse(responseCode = "204", description = "Produto deletado com sucesso")
+    @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();
