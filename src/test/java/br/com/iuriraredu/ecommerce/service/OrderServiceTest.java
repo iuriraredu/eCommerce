@@ -5,7 +5,7 @@ import br.com.iuriraredu.ecommerce.entity.Client;
 import br.com.iuriraredu.ecommerce.entity.Order;
 import br.com.iuriraredu.ecommerce.entity.OrderItem;
 import br.com.iuriraredu.ecommerce.entity.Product;
-import br.com.iuriraredu.ecommerce.entity.enums.OrderStatus;
+import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import br.com.iuriraredu.ecommerce.repository.OrderRepository;
 import br.com.iuriraredu.ecommerce.repository.ProductRepository;
@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static br.com.iuriraredu.ecommerce.entity.enums.OrderStatus.PAID;
+import static br.com.iuriraredu.ecommerce.entity.enums.OrderStatus.WAITING_FOR_PAYMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -94,7 +96,7 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when client is not found during order creation")
+    @DisplayName("Should throw ResourceNotFoundException when client is not found during order creation")
     void createOrderClientNotFound() {
         // Arrange
         Long clientId = 99L;
@@ -107,7 +109,7 @@ class OrderServiceTest {
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             orderService.create(order);
         });
 
@@ -137,33 +139,35 @@ class OrderServiceTest {
         Long orderId = 1L;
         Order order = new Order();
         order.setId(orderId);
-        order.setStatus(OrderStatus.WAITING_FOR_PAYMENT);
+        order.setStatus(WAITING_FOR_PAYMENT);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         // Act
-        Optional<Order> result = orderService.updateStatus(orderId, OrderStatus.PAID);
+        Order result = orderService.updateStatus(orderId, PAID);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(OrderStatus.PAID, result.get().getStatus());
+        assertNotNull(result);
+        assertEquals(PAID, result.getStatus());
         verify(orderRepository, times(1)).findById(orderId);
         verify(orderRepository, times(1)).save(order);
     }
 
     @Test
-    @DisplayName("Should return empty when trying to update status of non-existent order")
+    @DisplayName("Should throw ResourceNotFoundException when trying to update status of non-existent order")
     void updateOrderStatusNotFound() {
         // Arrange
         Long orderId = 99L;
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<Order> result = orderService.updateStatus(orderId, OrderStatus.PAID);
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> orderService.updateStatus(orderId, PAID)
+        );
 
-        // Assert
-        assertTrue(result.isEmpty());
+        assertEquals("Order not found with id: 99", exception.getMessage());
         verify(orderRepository, times(1)).findById(orderId);
         verify(orderRepository, never()).save(any());
     }

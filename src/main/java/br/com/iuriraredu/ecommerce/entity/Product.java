@@ -15,7 +15,7 @@ public class Product {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-
+    private Integer stockQuantity;
     private String name;
     private String description;
     private BigDecimal price;

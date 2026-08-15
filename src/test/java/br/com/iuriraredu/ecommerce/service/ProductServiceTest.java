@@ -1,6 +1,7 @@
 package br.com.iuriraredu.ecommerce.service;
 
 import br.com.iuriraredu.ecommerce.entity.Product;
+import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -78,11 +79,27 @@ class ProductServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         // Act
-        Optional<Product> result = productService.findById(productId);
+        Product result = productService.findById(productId);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(productId, result.get().getId());
+        assertNotNull(result);
+        assertEquals(productId, result.getId());
+        verify(productRepository, times(1)).findById(productId);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when product by id does not exist")
+    void findByIdNotFound() {
+        // Arrange
+        Long productId = 99L;
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class, () -> productService.findById(productId)
+        );
+
+        assertEquals("Product not found with id: 99", exception.getMessage());
         verify(productRepository, times(1)).findById(productId);
     }
 
@@ -91,37 +108,44 @@ class ProductServiceTest {
     void updateProductSuccess() {
         // Arrange
         Long productId = 1L;
+        Product existingProduct = new Product();
+        existingProduct.setId(productId);
+        existingProduct.setName("Old Name");
+
         Product updatedData = new Product();
         updatedData.setName("Updated Product Name");
+        updatedData.setPrice(BigDecimal.valueOf(150.00));
 
-        when(productRepository.existsById(productId)).thenReturn(true);
-        when(productRepository.save(any(Product.class))).thenReturn(updatedData);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(existingProduct);
 
         // Act
-        Optional<Product> result = productService.update(productId, updatedData);
+        Product result = productService.update(productId, updatedData);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals("Updated Product Name", result.get().getName());
-        verify(productRepository, times(1)).existsById(productId);
-        verify(productRepository, times(1)).save(updatedData);
+        assertNotNull(result);
+        assertEquals("Updated Product Name", result.getName());
+        verify(productRepository, times(1)).findById(productId);
+        verify(productRepository, times(1)).save(existingProduct);
     }
 
     @Test
-    @DisplayName("Should return empty when trying to update non-existent product")
+    @DisplayName("Should throw ResourceNotFoundException when trying to update non-existent product")
     void updateProductNotFound() {
         // Arrange
         Long productId = 99L;
         Product updatedData = new Product();
 
-        when(productRepository.existsById(productId)).thenReturn(false);
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<Product> result = productService.update(productId, updatedData);
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> productService.update(productId, updatedData)
+        );
 
-        // Assert
-        assertTrue(result.isEmpty());
-        verify(productRepository, times(1)).existsById(productId);
+        assertEquals("Product not found with id: 99", exception.getMessage());
+        verify(productRepository, times(1)).findById(productId);
         verify(productRepository, never()).save(any());
     }
 
@@ -133,27 +157,27 @@ class ProductServiceTest {
         when(productRepository.existsById(productId)).thenReturn(true);
         doNothing().when(productRepository).deleteById(productId);
 
-        // Act
-        boolean result = productService.delete(productId);
+        // Act & Assert
+        assertDoesNotThrow(() -> productService.delete(productId));
 
-        // Assert
-        assertTrue(result);
         verify(productRepository, times(1)).existsById(productId);
         verify(productRepository, times(1)).deleteById(productId);
     }
 
     @Test
-    @DisplayName("Should return false when trying to delete non-existent product")
+    @DisplayName("Should throw ResourceNotFoundException when trying to delete non-existent product")
     void deleteProductNotFound() {
         // Arrange
         Long productId = 99L;
         when(productRepository.existsById(productId)).thenReturn(false);
 
-        // Act
-        boolean result = productService.delete(productId);
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> productService.delete(productId)
+        );
 
-        // Assert
-        assertFalse(result);
+        assertEquals("Product not found with id: 99", exception.getMessage());
         verify(productRepository, times(1)).existsById(productId);
         verify(productRepository, never()).deleteById(any());
     }

@@ -5,6 +5,7 @@ import br.com.iuriraredu.ecommerce.dto.LoginResponseDTO;
 import br.com.iuriraredu.ecommerce.dto.RegisterDTO;
 import br.com.iuriraredu.ecommerce.entity.User;
 import br.com.iuriraredu.ecommerce.entity.enums.UserRole;
+import br.com.iuriraredu.ecommerce.exception.BusinessException;
 import br.com.iuriraredu.ecommerce.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +18,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -79,18 +80,16 @@ class AuthServiceTest {
         when(userRepository.findByLogin(data.login())).thenReturn(null);
         when(passwordEncoder.encode(data.password())).thenReturn("encodedPassword");
 
-        // Act
-        boolean result = authService.register(data);
+        // Act & Assert (não retorna mais boolean, então apenas executamos)
+        assertDoesNotThrow(() -> authService.register(data));
 
-        // Assert
-        assertTrue(result);
         verify(userRepository, times(1)).findByLogin(data.login());
         verify(passwordEncoder, times(1)).encode(data.password());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Should return false when trying to register with an already existing login")
+    @DisplayName("Should throw BusinessException when trying to register with an already existing login")
     void registerUserAlreadyExists() {
         // Arrange
         RegisterDTO data = new RegisterDTO("existing@email.com", "password123", UserRole.USER);
@@ -99,11 +98,10 @@ class AuthServiceTest {
 
         when(userRepository.findByLogin(data.login())).thenReturn(existingUser);
 
-        // Act
-        boolean result = authService.register(data);
+        // Act & Assert (esperamos que lance a BusinessException)
+        BusinessException exception = assertThrows(BusinessException.class, () -> authService.register(data));
 
-        // Assert
-        assertFalse(result);
+        assertEquals("User already exists with this login!", exception.getMessage());
         verify(userRepository, times(1)).findByLogin(data.login());
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any());

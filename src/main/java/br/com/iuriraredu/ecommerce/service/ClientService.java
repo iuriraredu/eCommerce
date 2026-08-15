@@ -1,6 +1,7 @@
 package br.com.iuriraredu.ecommerce.service;
 
 import br.com.iuriraredu.ecommerce.entity.Client;
+import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,19 +29,22 @@ public class ClientService {
         return clientRepository.findAll();
     }
 
-    public Optional<Client> findById(Long id) {
-        return clientRepository.findById(id);
+    public Client findById(Long id) {
+        return clientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + id));
     }
 
-    public Optional<Client> update(Long id, Client newClient) {
-        if (!clientRepository.existsById(id)) return Optional.empty();
-        newClient.setId(id);
-        return Optional.of(clientRepository.save(newClient));
+    public Client update(Long id, Client updatedClient) {
+        Client client = findById(id);
+        client.setName(updatedClient.getName());
+        client.setCpf(updatedClient.getCpf());
+        return clientRepository.save(client);
     }
 
-    public boolean delete(Long id) {
-        if (!clientRepository.existsById(id)) return false;
+    public void delete(Long id) {
+        if (!clientRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Client not found with id: " + id);
+        }
         clientRepository.deleteById(id);
-        return true;
     }
 }

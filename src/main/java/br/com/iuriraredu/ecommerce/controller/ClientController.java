@@ -36,22 +36,17 @@ public class ClientController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Client> findById(@PathVariable Long id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Client> update(@PathVariable Long id, @RequestBody Client client) {
-        return service.update(id, client)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(service.update(id, client));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return service.delete(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

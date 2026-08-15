@@ -2,6 +2,7 @@ package br.com.iuriraredu.ecommerce.service;
 
 import br.com.iuriraredu.ecommerce.entity.*;
 import br.com.iuriraredu.ecommerce.entity.enums.OrderStatus;
+import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import br.com.iuriraredu.ecommerce.repository.OrderRepository;
 import br.com.iuriraredu.ecommerce.repository.ProductRepository;
@@ -21,42 +22,37 @@ public class OrderService {
 
     public Order create(Order order) {
         Client client = clientRepository.findById(order.getClient().getId())
-                .orElseThrow(() -> new RuntimeException("Client not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found!"));
 
         order.setClient(client);
         order.setClientDocumentSnapshot(client.getCpf());
 
-        if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
-            Address chosenAddress = client.getAddresses().stream()
-                    .filter(addr -> addr.getId().equals(order.getDeliveryAddressId()))
-                    .findFirst()
-                    .orElse(client.getAddresses().getFirst());
+        Address deliveryAddress = client.getAddresses().stream()
+                .filter(addr -> addr.getId().equals(order.getDeliveryAddressId()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery address not found for this client!"));
 
-            String snapshot = String.format(
-                    "%s, %s - %s, CEP: %s%s",
-                    chosenAddress.getStreet(),
-                    chosenAddress.getNumber(),
-                    chosenAddress.getNeighborhood(),
-                    chosenAddress.getCep(),
-                    chosenAddress.getComplement() != null
-                            ? String.format(" (%s)", chosenAddress.getComplement())
-                            : ""
-            );
-
-            order.setDeliveryAddressSnapshot(snapshot);
-        } else {
-            order.setDeliveryAddressSnapshot("Client without registered address");
-        }
+        String addressSnapshot = String.format(
+                "%s, %s - %s, CEP: %s%s",
+                deliveryAddress.getStreet(),
+                deliveryAddress.getNumber(),
+                deliveryAddress.getNeighborhood(),
+                deliveryAddress.getCep(),
+                deliveryAddress.getComplement() != null
+                        ? String.format(" (%s)", deliveryAddress.getComplement())
+                        : ""
+        );
+        order.setDeliveryAddressSnapshot(addressSnapshot);
 
         for (OrderItem item : order.getItems()) {
             Product product = productRepository.findById(item.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Product not found!"));
-
-            item.setSoldPrice(product.getPrice());
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + item.getProduct().getId()));
             item.setProduct(product);
+            item.setSoldPrice(product.getPrice());
             item.setOrder(order);
         }
 
+        order.setStatus(OrderStatus.WAITING_FOR_PAYMENT);
         return orderRepository.save(order);
     }
 
@@ -64,15 +60,14 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public Optional<Order> updateStatus(Long id, OrderStatus newStatus) {
-        Optional<Order> orderOpt = orderRepository.findById(id);
+    public Order findById(Long id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+    }
 
-        if (orderOpt.isEmpty()) return Optional.empty();
-
-        Order order = orderOpt.get();
-        order.setStatus(newStatus);
-
-        Order savedOrder = orderRepository.save(order);
-        return Optional.of(savedOrder);
+    public Order updateStatus(Long id, OrderStatus status) throws ResourceNotFoundException {
+        Order order = findById(id);
+        order.setStatus(status);
+        return orderRepository.save(order);
     }
 }

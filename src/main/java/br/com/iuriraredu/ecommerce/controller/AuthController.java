@@ -5,6 +5,7 @@ import br.com.iuriraredu.ecommerce.dto.LoginResponseDTO;
 import br.com.iuriraredu.ecommerce.dto.RegisterDTO;
 import br.com.iuriraredu.ecommerce.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,17 +22,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody AuthenticationDTO data) {
-        LoginResponseDTO response = authService.login(data);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
+        LoginResponseDTO token = authService.login(data);
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterDTO data) {
-        boolean success = authService.register(data);
-        if (!success) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterDTO data) {
+        authService.register(data);
         return ResponseEntity.status(CREATED).build();
     }
 }

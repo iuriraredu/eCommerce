@@ -4,6 +4,7 @@ import br.com.iuriraredu.ecommerce.dto.AuthenticationDTO;
 import br.com.iuriraredu.ecommerce.dto.LoginResponseDTO;
 import br.com.iuriraredu.ecommerce.dto.RegisterDTO;
 import br.com.iuriraredu.ecommerce.entity.User;
+import br.com.iuriraredu.ecommerce.exception.BusinessException;
 import br.com.iuriraredu.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,9 +30,9 @@ public class AuthService {
         return new LoginResponseDTO(token);
     }
 
-    public boolean register(RegisterDTO data) {
+    public void register(RegisterDTO data) {
         if (this.userRepository.findByLogin(data.login()) != null) {
-            return false;
+            throw new BusinessException("User already exists with this login!");
         }
 
         String encryptedPassword = passwordEncoder.encode(data.password());
@@ -41,6 +42,5 @@ public class AuthService {
         user.setRole(data.role());
 
         this.userRepository.save(user);
-        return true;
     }
 }

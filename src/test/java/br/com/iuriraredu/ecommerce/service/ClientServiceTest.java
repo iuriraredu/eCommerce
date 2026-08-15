@@ -3,6 +3,7 @@ package br.com.iuriraredu.ecommerce.service;
 import br.com.iuriraredu.ecommerce.entity.Address;
 import br.com.iuriraredu.ecommerce.entity.Client;
 import br.com.iuriraredu.ecommerce.entity.Phone;
+import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -87,11 +88,27 @@ class ClientServiceTest {
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
 
         // Act
-        Optional<Client> result = clientService.findById(clientId);
+        Client result = clientService.findById(clientId);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(clientId, result.get().getId());
+        assertNotNull(result);
+        assertEquals(clientId, result.getId());
+        verify(clientRepository, times(1)).findById(clientId);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when find client by id does not exist")
+    void findByIdNotFound() {
+        // Arrange
+        Long clientId = 99L;
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            clientService.findById(clientId);
+        });
+
+        assertEquals("Client not found with id: 99", exception.getMessage());
         verify(clientRepository, times(1)).findById(clientId);
     }
 
@@ -106,35 +123,37 @@ class ClientServiceTest {
 
         Client updatedData = new Client();
         updatedData.setName("Nome Novo");
+        updatedData.setCpf("123.456.789-00");
 
-        when(clientRepository.existsById(clientId)).thenReturn(true);
-        when(clientRepository.save(any(Client.class))).thenReturn(updatedData);
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.save(any(Client.class))).thenReturn(existingClient);
 
         // Act
-        Optional<Client> result = clientService.update(clientId, updatedData);
+        Client result = clientService.update(clientId, updatedData);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(clientId, result.get().getId());
-        verify(clientRepository, times(1)).existsById(clientId);
-        verify(clientRepository, times(1)).save(updatedData);
+        assertNotNull(result);
+        assertEquals("Nome Novo", result.getName());
+        verify(clientRepository, times(1)).findById(clientId);
+        verify(clientRepository, times(1)).save(existingClient);
     }
 
     @Test
-    @DisplayName("Should return empty when trying to update non-existent client")
+    @DisplayName("Should throw ResourceNotFoundException when trying to update non-existent client")
     void updateClientNotFound() {
         // Arrange
         Long clientId = 99L;
         Client updatedData = new Client();
 
-        when(clientRepository.existsById(clientId)).thenReturn(false);
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<Client> result = clientService.update(clientId, updatedData);
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            clientService.update(clientId, updatedData);
+        });
 
-        // Assert
-        assertTrue(result.isEmpty());
-        verify(clientRepository, times(1)).existsById(clientId);
+        assertEquals("Client not found with id: 99", exception.getMessage());
+        verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, never()).save(any());
     }
 
@@ -146,29 +165,27 @@ class ClientServiceTest {
         when(clientRepository.existsById(clientId)).thenReturn(true);
         doNothing().when(clientRepository).deleteById(clientId);
 
-        // Act
-        boolean result = clientService.delete(clientId);
+        // Act & Assert
+        assertDoesNotThrow(() -> clientService.delete(clientId));
 
-        // Assert
-        assertTrue(result);
         verify(clientRepository, times(1)).existsById(clientId);
         verify(clientRepository, times(1)).deleteById(clientId);
     }
 
     @Test
-    @DisplayName("Should return false when trying to delete non-existent client")
+    @DisplayName("Should throw ResourceNotFoundException when trying to delete non-existent client")
     void deleteClientNotFound() {
         // Arrange
         Long clientId = 99L;
         when(clientRepository.existsById(clientId)).thenReturn(false);
 
-        // Act
-        boolean result = clientService.delete(clientId);
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            clientService.delete(clientId);
+        });
 
-        // Assert
-        assertFalse(result);
+        assertEquals("Client not found with id: 99", exception.getMessage());
         verify(clientRepository, times(1)).existsById(clientId);
         verify(clientRepository, never()).deleteById(any());
     }
 }
-
