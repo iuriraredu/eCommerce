@@ -19,7 +19,7 @@
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springdoc.version>2.5.0</springdoc.version>
-        <jjwt.version>0.13.0</jjwt.version>
+        <jjwt.version>0.12.6</jjwt.version> <!-- Alterado de 0.13.0 para 0.12.6 -->
         <jackson.version>2.15.4</jackson.version>
     </properties>
 
