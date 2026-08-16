@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/products")
@@ -28,29 +29,33 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Cadastrar novo produto",
             description = "Cria um novo produto no estoque utilizando os dados fornecidos no corpo da requisição e retorna o produto recém-criado com seu ID gerado."
     )
     @ApiResponse(responseCode = "201", description = "Produto cadastrado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para o cadastro do produto")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Product> create(@RequestBody Product product) {
         Product createdProduct = productService.create(product);
         return ResponseEntity.status(CREATED).body(createdProduct);
     }
 
-    @GetMapping
+    @GetMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar todos os produtos",
             description = "Retorna uma lista contendo todos os produtos cadastrados atualmente no sistema."
     )
     @ApiResponse(responseCode = "200", description = "Lista de produtos retornada com sucesso")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public List<Product> getAll() {
         return productService.getAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Buscar produto por ID",
             description = "Retorna os detalhes de um produto específico com base no ID informado na URL."
@@ -61,21 +66,29 @@ public class ProductController {
         return ResponseEntity.ok(productService.findById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}",consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Atualizar produto por ID",
             description = "Atualiza os detalhes de um produto específico com base no ID informado na URL e retorna o produto atualizado."
     )
+    @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a atualização")
+    @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product updatedProduct) {
         return ResponseEntity.ok(productService.update(id, updatedProduct));
     }
 
-    @DeleteMapping("/{id}")@Operation(
+    @DeleteMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @Operation(
             summary = "Deletar produto",
             description = "Remove um produto do sistema com base no ID informado na URL. Retorna status sem conteúdo em caso de sucesso."
     )
     @ApiResponse(responseCode = "204", description = "Produto deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();

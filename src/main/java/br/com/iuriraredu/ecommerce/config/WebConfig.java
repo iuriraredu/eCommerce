@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final RequestLoggingInterceptor loggingInterceptor;
 
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loggingInterceptor);
     }

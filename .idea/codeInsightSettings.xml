@@ -9,6 +9,7 @@
       <name>br.com.iuriraredu.ecommerce.entity.emuns.UserRole</name>
       <name>org.junit.jupiter.api.Assertions</name>
       <name>org.mockito.Mockito</name>
+      <name>org.springframework.http.MediaType</name>
     </included-static-names>
   </component>
 </project>

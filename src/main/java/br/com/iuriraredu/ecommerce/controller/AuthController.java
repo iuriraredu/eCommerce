@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,7 +25,8 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class AuthController {
 
     private final AuthService authService;
-    @PostMapping("/login")
+
+    @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Realizar autenticação (Login)",
             description = "Autentica um usuário no sistema utilizando credenciais válidas (e-mail e senha) e retorna um token JWT para acesso aos endpoints protegidos."
@@ -32,18 +34,22 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Login realizado com sucesso, retornando o token de acesso")
     @ApiResponse(responseCode = "400", description = "Dados de autenticação inválidos ou faltando preenchimento")
     @ApiResponse(responseCode = "401", description = "Credenciais inválidas (usuário ou senha incorretos)")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
         LoginResponseDTO token = authService.login(data);
         return ResponseEntity.ok(token);
     }
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Registrar novo usuário",
             description = "Cadastra um novo usuário no sistema com base nos dados informados no corpo da requisição."
     )
     @ApiResponse(responseCode = "201", description = "Usuário registrado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou e-mail já cadastrado")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Void> register(@RequestBody @Valid RegisterDTO data) {
         authService.register(data);
         return ResponseEntity.status(CREATED).build();

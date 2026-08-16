@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/orders")
@@ -27,29 +28,33 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Criar novo pedido",
             description = "Registra um novo pedido no sistema com base nos dados fornecidos no corpo da requisição e retorna o pedido criado com status 201 Created."
     )
     @ApiResponse(responseCode = "201", description = "Pedido criado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a criação do pedido")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Order> create(@RequestBody Order order) {
         Order createdOrder = orderService.create(order);
         return ResponseEntity.status(CREATED).body(createdOrder);
     }
 
-    @GetMapping
+    @GetMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar todos os pedidos",
             description = "Retorna uma lista contendo todos os pedidos realizados no sistema."
     )
     @ApiResponse(responseCode = "200", description = "Lista de pedidos retornada com sucesso")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public List<Order> getAll() {
         return orderService.getAll();
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping(value = "/{id}/status", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Atualizar status do pedido",
             description = "Atualiza parcialmente o status de um pedido específico com base no ID fornecido na URL e no novo status enviado no corpo da requisição."
@@ -57,6 +62,8 @@ public class OrderController {
     @ApiResponse(responseCode = "200", description = "Status do pedido atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Status inválido ou dados incorretos")
     @ApiResponse(responseCode = "404", description = "Pedido não encontrado para o ID informado")
+    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
+    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
         return ResponseEntity.ok(orderService.updateStatus(id, newStatus));
     }
