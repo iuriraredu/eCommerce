@@ -51,17 +51,21 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.findById(id));
-    }
-
-    @PutMapping("/{id}")
     @Operation(
             summary = "Buscar produto por ID",
             description = "Retorna os detalhes de um produto específico com base no ID informado na URL."
     )
     @ApiResponse(responseCode = "200", description = "Produto encontrado com sucesso")
     @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
+    public ResponseEntity<Product> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findById(id));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Atualizar produto por ID",
+            description = "Atualiza os detalhes de um produto específico com base no ID informado na URL e retorna o produto atualizado."
+    )
     public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product updatedProduct) {
         return ResponseEntity.ok(productService.update(id, updatedProduct));
     }

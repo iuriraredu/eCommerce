@@ -5,6 +5,7 @@ import br.com.iuriraredu.ecommerce.entity.enums.OrderStatus;
 import br.com.iuriraredu.ecommerce.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
+@Tag(name = "Pedido", description = "Gerenciamento de pedidos de produtos (Criar, Listar e Atualizar pedidos).")
 public class OrderController {
     private final OrderService orderService;
 

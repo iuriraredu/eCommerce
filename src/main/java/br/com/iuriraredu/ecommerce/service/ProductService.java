@@ -4,6 +4,8 @@ import br.com.iuriraredu.ecommerce.entity.Product;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,19 +15,23 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
 
+    @CacheEvict(value = "products", allEntries = true)
     public Product create(Product product) {
         return productRepository.save(product);
     }
 
+    @Cacheable(value = "products")
     public List<Product> getAll() {
         return productRepository.findAll();
     }
 
+    @Cacheable(value = "products", key = "#id")
     public Product findById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     public Product update(Long id, Product updatedProduct) {
         Product product = findById(id);
         product.setName(updatedProduct.getName());
@@ -35,6 +41,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Product not found with id: " + id);

@@ -4,6 +4,8 @@ import br.com.iuriraredu.ecommerce.entity.Client;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +17,7 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
 
+    @CacheEvict(value = "clients", allEntries = true)
     public Client create(Client client) {
         if (client.getAddresses() != null)
             client.getAddresses().forEach(address -> address.setClient(client));
@@ -25,15 +28,18 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
+    @Cacheable(value = "clients")
     public List<Client> getAll() {
         return clientRepository.findAll();
     }
 
+    @Cacheable(value = "clients", key = "#id")
     public Client findById(Long id) {
         return clientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + id));
     }
 
+    @CacheEvict(value = "clients", allEntries = true)
     public Client update(Long id, Client updatedClient) {
         Client client = findById(id);
         client.setName(updatedClient.getName());
@@ -41,6 +47,7 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
+    @CacheEvict(value = "clients", allEntries = true)
     public void delete(Long id) {
         if (!clientRepository.existsById(id)) {
             throw new ResourceNotFoundException("Client not found with id: " + id);

@@ -6,6 +6,7 @@ import br.com.iuriraredu.ecommerce.dto.RegisterDTO;
 import br.com.iuriraredu.ecommerce.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Autenticação", description = "Gerenciamento de usuários (Realiza acesso ao sistema e Cadastra novo usuário).")
 public class AuthController {
 
     private final AuthService authService;

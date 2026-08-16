@@ -4,6 +4,7 @@ import br.com.iuriraredu.ecommerce.entity.Client;
 import br.com.iuriraredu.ecommerce.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/clients")
 @RequiredArgsConstructor
+@Tag(name = "Cliente", description = "Gerenciamento de clientes (Cadastra, Busca, Atualiza e Deleta clientes).")
 public class ClientController {
     private final ClientService service;
 
