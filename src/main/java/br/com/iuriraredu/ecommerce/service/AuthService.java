@@ -46,7 +46,7 @@ public class AuthService {
 
     private void createUser(RegisterDTO data, UserRole role) {
         if (this.userRepository.findByLogin(data.login()) != null) {
-            throw new BusinessException("User already exists with this login!");
+            throw new BusinessException("User already exists with this login!"); // Se eu quiser fazer i18n, como você faria para deixar essa mensagem em diversas línguas diferentes? Além disso, se eu quiser retornar códigos customizados de Http (400, 404 etc) como eu faria isso?
         }
 
         String encryptedPassword = passwordEncoder.encode(data.password());

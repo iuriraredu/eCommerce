@@ -26,7 +26,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE) // Não precisa do consumes/produces, por padrão já vai ser json
     @Operation(
             summary = "Realizar autenticação (Login)",
             description = "Autentica um usuário no sistema utilizando credenciais válidas (e-mail e senha) e retorna um token JWT para acesso aos endpoints protegidos."
@@ -36,12 +36,12 @@ public class AuthController {
     @ApiResponse(responseCode = "401", description = "Credenciais inválidas (usuário ou senha incorretos)")
     @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
     @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthenticationDTO data) { // O que é "data"??? Precisa ser mais específico no nome do parâmetro
         LoginResponseDTO token = authService.login(data);
         return ResponseEntity.ok(token);
     }
 
-    @PostMapping(value = "/register", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/register", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE) // Não precisa do consumes/produces, por padrão já vai ser json
     @Operation(
             summary = "Registrar novo usuário",
             description = "Cadastra um novo usuário no sistema com base nos dados informados no corpo da requisição."
@@ -50,12 +50,13 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou e-mail já cadastrado")
     @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
     @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Void> register(@RequestBody @Valid RegisterDTO data) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterDTO data) { // O que é "data"??? Precisa ser mais específico no nome do parâmetro
         authService.register(data);
         return ResponseEntity.status(CREATED).build();
     }
 
-    @PostMapping(value = "/register/admin", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    // O endpoint abaixo deveria estar em outra aplicação para evitar brute force, de preferência em uma rede interna. Como é apenas para aprender, está ok.
+    @PostMapping(value = "/register/admin", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE) // Não precisa do consumes/produces, por padrão já vai ser json
     @Operation(
             summary = "Registrar novo usuário com role customizada (restrito a administradores)",
             description = "Cadastra um novo usuário respeitando a role informada no corpo da requisição. Diferente de /auth/register, este endpoint exige autenticação com ROLE_ADMIN."
@@ -64,8 +65,8 @@ public class AuthController {
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou e-mail já cadastrado")
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Autenticado, mas sem permissão de administrador")
-    public ResponseEntity<Void> registerWithRole(@RequestBody @Valid RegisterDTO data) {
-        authService.registerWithRole(data);
+    public ResponseEntity<Void> registerWithRole(@RequestBody @Valid RegisterDTO data) { // O que é "data"??? Precisa ser mais específico no nome do parâmetro
+        authService.registerWithRole(data); // O recurso fica ambíguo na funcionalidade a partir do endpoint (/register/admin) e das funções chamadas (registerWithRole), ou seja, esse recurso é para cadastrar um admin ou um usuário podendo escolher qual a ROLE dele?
         return ResponseEntity.status(CREATED).build();
     }
 }

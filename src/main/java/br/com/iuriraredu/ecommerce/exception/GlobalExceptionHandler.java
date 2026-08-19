@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.*; // Não faça import.*, sempre deixe explícito o que você está importando.
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

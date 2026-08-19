@@ -23,13 +23,14 @@ public class ClientService {
     private final ClientRepository clientRepository;
 
     @Transactional
-    @CacheEvict(value = "clients", allEntries = true)
+    @CacheEvict(value = "clients", allEntries = true) // Cache do spring em geral é mais lento do que fazer cache na mão.
     public ClientResponseDTO create(ClientRequestDTO dto) {
         Client client = new Client();
         client.setName(dto.name());
         client.setEmail(dto.email());
         client.setCpf(dto.cpf());
 
+        // Muita lógica de mapeamento na service que não deveria estar aqui.
         if (dto.addresses() != null) {
             List<Address> addresses = dto.addresses().stream().map(a -> {
                 Address address = a.toEntity();
@@ -63,11 +64,11 @@ public class ClientService {
         return ClientResponseDTO.fromEntity(findEntityById(id));
     }
 
-    @Transactional
+    @Transactional // Você sabe o que o @Transactional faz? Se você tomar uma checked exception aqui, provavelmente esse cara não vai funcionar.
     @CacheEvict(value = "clients", allEntries = true)
     public ClientResponseDTO update(Long id, ClientRequestDTO dto) {
         Client client = findEntityById(id);
-        client.setName(dto.name());
+        client.setName(dto.name()); // Por que está mapeando os campos aqui quando você tem DTOs com mappers imbutidos?
         client.setEmail(dto.email());
         client.setCpf(dto.cpf());
         return ClientResponseDTO.fromEntity(clientRepository.save(client));
@@ -83,7 +84,7 @@ public class ClientService {
     }
 
     // Uso interno (ex.: OrderService) quando é preciso a entidade gerenciada, não o DTO.
-    Client findEntityById(Long id) {
+    Client findEntityById(Long id) { // Se esse cara é pra uso interno, cadê o modificador "private"?
         return clientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + id));
     }

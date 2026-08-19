@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 @Tag(name = "Cliente", description = "Gerenciamento de clientes (Cadastra, Busca, Atualiza e Deleta clientes).")
 public class ClientController {
-    private final ClientService service;
+    private final ClientService service; // Olhando aqui fica claro que "service" é uma service de clientes, mas em outras partes se eu olho, não é possível saber se é service de cliente, service de supermercado, service de loja etc. Precisa renomear.
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
@@ -37,12 +37,12 @@ public class ClientController {
     )
     @ApiResponse(responseCode = "201", description = "Cliente cadastrado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para o cadastro")
-    public ResponseEntity<ClientResponseDTO> create(@RequestBody @Valid ClientRequestDTO dto) {
-        ClientResponseDTO savedClient = service.create(dto);
+    public ResponseEntity<ClientResponseDTO> create(@RequestBody @Valid ClientRequestDTO dto) { // O que é "dto"??? Precisa ser mais específico no nome do parâmetro
+        ClientResponseDTO savedClient = service.create(dto); // O método create cria o que? Cria um caminhão? Precisa renomear.
         return ResponseEntity.status(CREATED).body(savedClient);
     }
 
-    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    @GetMapping(produces = APPLICATION_JSON_VALUE) // Não precisa do consumes/produces, fica redundante
     @Operation(
             summary = "Listar todos os clientes",
             description = "Retorna uma lista contendo todos os clientes cadastrados no sistema."
@@ -52,18 +52,18 @@ public class ClientController {
         return service.getAll();
     }
 
-    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE) // Não precisa do consumes/produces, fica redundante
     @Operation(
             summary = "Buscar cliente por ID",
             description = "Retorna os detalhes de um cliente específico com base no ID informado na URL."
     )
     @ApiResponse(responseCode = "200", description = "Cliente encontrado com sucesso")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    public ResponseEntity<ClientResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<ClientResponseDTO> findById(@PathVariable Long id) { // O que é "id", "id" de quem?? id do cliente? id do supermercado?
+        return ResponseEntity.ok(service.findById(id)); // O método findById procura o que? Procura um caminhão? Precisa renomear.
     }
 
-    @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE) // Não precisa do consumes/produces, fica redundante
     @Operation(
             summary = "Atualizar cliente",
             description = "Atualiza os dados cadastrais de um cliente existente com base no ID informado e nos novos dados fornecidos no corpo da requisição."
@@ -71,8 +71,9 @@ public class ClientController {
     @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a atualização")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    public ResponseEntity<ClientResponseDTO> update(@PathVariable Long id, @RequestBody @Valid ClientRequestDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+    public ResponseEntity<ClientResponseDTO> update(@PathVariable Long id,  // O que é "id", "id" de quem?? id do cliente? id do supermercado?
+    @RequestBody @Valid ClientRequestDTO dto) { // O que é "dto"??? Precisa ser mais específico no nome do parâmetro
+        return ResponseEntity.ok(service.update(id, dto)); // O método create atualiza o que por qual parâmetro? Atualiza um caminhão pela placa? Precisa renomear.
     }
 
     @DeleteMapping(value = "/{id}")
@@ -83,7 +84,7 @@ public class ClientController {
     @ApiResponse(responseCode = "204", description = "Cliente deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+        service.delete(id); // O método delete deleta o que por qual parâmetro? Deleta um caminhão pela placa? Precisa renomear.
         return ResponseEntity.noContent().build();
     }
 }

@@ -16,7 +16,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "id") // Tira esse cara e faz manualmente, seguindo ali como o plugin JPA Buddy cria para você.
 @ToString(exclude = {"addresses", "phones"})
 @Entity
 public class Client {
@@ -29,7 +29,7 @@ public class Client {
     private String cpf;
 
     @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
-    private List<Address> addresses;
+    private List<Address> addresses; // Talvez fosse interessante ser um Set<Address> em vez de List<Address>, mas isso depende da regra de negócio. O mesmo se aplica para outros campos de List<...>. 
 
     @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
     private List<Phone> phones;

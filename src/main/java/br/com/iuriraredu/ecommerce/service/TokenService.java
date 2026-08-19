@@ -25,6 +25,7 @@ public class TokenService {
                     .subject(user.getUsername())
                     .issuedAt(new Date())
                     .expiration(new Date(currentTimeMillis() + 7200000)) // 2 horas
+                    // Tempo de expiração muito alto para um JWT, deveria ser questão de 1 minuto por exemplo. Além disso, escreva 2 horas de uma forma mais legível, por exemplo: 2 * 60 * 60 (não necessariamente são 2 horas em ms, é apenas um exemplo)
                     .signWith(key)
                     .compact();
         } catch (Exception e) {
@@ -35,7 +36,7 @@ public class TokenService {
     // Valida o token e retorna o login do usuário (subject)
     public String validateToken(String token) {
         try {
-            SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(UTF_8));
+            SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(UTF_8)); // O token só está sendo assinado, tornando ele assim um JWS, precisa criptografar ele também para ser um JWE, de preferência com uma chave diferente da assinatura.
             return Jwts.parser()
                     .verifyWith(key)
                     .build()
@@ -43,7 +44,7 @@ public class TokenService {
                     .getPayload()
                     .getSubject();
         } catch (Exception e) {
-            return "";
+            return ""; // Não existe tratativa de erro?
         }
     }
 }

@@ -4,7 +4,7 @@ import br.com.iuriraredu.ecommerce.entity.Address;
 import jakarta.validation.constraints.NotBlank;
 
 public record AddressDTO(
-        Long id,
+        Long id, // Qual o motivo de possuir esse campo? Olhando pelo corpo do DTO, é de request pelas validações, o ID você provavelmente não deveria estar mandando aqui.
 
         @NotBlank(message = "A rua é obrigatória")
         String street,
