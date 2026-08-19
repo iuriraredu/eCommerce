@@ -43,7 +43,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     private String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
+            return authHeader.substring(7); // o que é substring(7) ??? Precisa especificar melhor, talvez usar uma variável para indicar o que o 7 representa ou usar authHeader.replace("Bearer ", "")
         }
         return null;
     }

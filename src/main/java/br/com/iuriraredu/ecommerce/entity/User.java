@@ -29,7 +29,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @ToString(exclude = "password")
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User implements UserDetails { // Seu banco de dados está dependente do Spring, se você trocar pro Quarkus vai dar erro nessa classe sem precisar. É interessante ter uma classe diferente que implemente o UserDetails e deixar a classe atual User.java apenas como entidade de banco de dados.
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
@@ -37,7 +37,7 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String login;
 
-    @Column(nullable = false)
+    @Column(nullable = false) // Cadê o limite de caracteres?
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -46,7 +46,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return (this.role == ADMIN)
-                ? List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"))
+                ? List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER")) // Isso aqui não deveria ser preenchido pelo código, mas sim por uma relação entre usuário e papéis em uma tabela do banco de dados. Se for preencher pelo código, pelo menus utilize a ENUM que você tem para isso.
                 : List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 

@@ -60,7 +60,7 @@ public class ProductService {
     }
 
     // Uso interno (ex.: OrderService) quando é preciso a entidade gerenciada, não o DTO.
-    Product findEntityById(Long id) {
+    Product findEntityById(Long id) { // cadê o "private" se é pra uso interno?
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
