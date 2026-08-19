@@ -15,9 +15,17 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         log.info("Method: {}", request.getMethod());
         log.info("URI: {}", request.getRequestURI());
         log.info("User-Agent: {}", request.getHeader("User-Agent"));
-        log.info("Authorization: {}", request.getHeader("Authorization"));
+        log.info("Authorization: {}", maskAuthorizationHeader(request.getHeader("Authorization")));
         log.info("Content-Type: {}", request.getHeader("Content-Type"));
         log.info("-------------------------");
         return true;
     }
+
+    private String maskAuthorizationHeader(String authHeader) {
+        if (authHeader == null) {
+            return "não informado";
+        }
+        return "presente (oculto)";
+    }
 }
+

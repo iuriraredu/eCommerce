@@ -33,6 +33,8 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(POST, "/auth/login", "/auth/register").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/h2-console/**","/h2-console/login.do").permitAll()
+                        .requestMatchers(POST, "/auth/register/admin").hasRole("ADMIN")
                         .requestMatchers(POST, "/products").hasRole("ADMIN")
                         .requestMatchers(PUT, "/products/**").hasRole("ADMIN")
                         .requestMatchers(DELETE, "/products/**").hasRole("ADMIN")

@@ -1,6 +1,12 @@
 package br.com.iuriraredu.ecommerce.service;
 
-import br.com.iuriraredu.ecommerce.entity.*;
+import br.com.iuriraredu.ecommerce.dto.OrderRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.OrderResponseDTO;
+import br.com.iuriraredu.ecommerce.entity.Address;
+import br.com.iuriraredu.ecommerce.entity.Client;
+import br.com.iuriraredu.ecommerce.entity.Order;
+import br.com.iuriraredu.ecommerce.entity.OrderItem;
+import br.com.iuriraredu.ecommerce.entity.Product;
 import br.com.iuriraredu.ecommerce.entity.enums.OrderStatus;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
@@ -8,66 +14,83 @@ import br.com.iuriraredu.ecommerce.repository.OrderRepository;
 import br.com.iuriraredu.ecommerce.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final ClientRepository clientRepository;
 
-    public Order create(Order order) {
-        Client client = clientRepository.findById(order.getClient().getId())
+    @Transactional
+    public OrderResponseDTO create(OrderRequestDTO dto) {
+        Client client = clientRepository.findById(dto.clientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Client not found!"));
 
-        order.setClient(client);
-        order.setClientDocumentSnapshot(client.getCpf());
-
         Address deliveryAddress = client.getAddresses().stream()
-                .filter(addr -> addr.getId().equals(order.getDeliveryAddressId()))
+                .filter(addr -> addr.getId().equals(dto.deliveryAddressId()))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Delivery address not found for this client!"));
 
-        String addressSnapshot = String.format(
-                "%s, %s - %s, CEP: %s%s",
-                deliveryAddress.getStreet(),
-                deliveryAddress.getNumber(),
-                deliveryAddress.getNeighborhood(),
-                deliveryAddress.getCep(),
-                deliveryAddress.getComplement() != null
-                        ? String.format(" (%s)", deliveryAddress.getComplement())
-                        : ""
-        );
-        order.setDeliveryAddressSnapshot(addressSnapshot);
+        Order order = new Order();
+        order.setClient(client);
+        order.setClientDocumentSnapshot(client.getCpf());
+        order.setDeliveryAddressSnapshot(buildAddressSnapshot(deliveryAddress));
+        order.setStatus(OrderStatus.WAITING_FOR_PAYMENT);
 
-        for (OrderItem item : order.getItems()) {
-            Product product = productRepository.findById(item.getProduct().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + item.getProduct().getId()));
+        List<OrderItem> items = dto.items().stream().map(itemDto -> {
+            Product product = productRepository.findById(itemDto.productId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemDto.productId()));
+
+            OrderItem item = new OrderItem();
             item.setProduct(product);
+            item.setQuantity(itemDto.quantity());
             item.setSoldPrice(product.getPrice());
             item.setOrder(order);
-        }
+            return item;
+        }).toList();
+        order.setItems(items);
 
-        order.setStatus(OrderStatus.WAITING_FOR_PAYMENT);
-        return orderRepository.save(order);
+        return OrderResponseDTO.fromEntity(orderRepository.save(order));
     }
 
-    public List<Order> getAll() {
-        return orderRepository.findAll();
+    public List<OrderResponseDTO> getAll() {
+        return orderRepository.findAll().stream()
+                .map(OrderResponseDTO::fromEntity)
+                .toList();
     }
 
-    public Order findById(Long id) {
+    public OrderResponseDTO findById(Long id) {
+        return OrderResponseDTO.fromEntity(findEntityById(id));
+    }
+
+    @Transactional
+    public OrderResponseDTO updateStatus(Long id, OrderStatus status) {
+        Order order = findEntityById(id);
+        order.setStatus(status);
+        return OrderResponseDTO.fromEntity(orderRepository.save(order));
+    }
+
+    private Order findEntityById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
     }
 
-    public Order updateStatus(Long id, OrderStatus status) throws ResourceNotFoundException {
-        Order order = findById(id);
-        order.setStatus(status);
-        return orderRepository.save(order);
+    private String buildAddressSnapshot(Address address) {
+        return String.format(
+                "%s, %s - %s, CEP: %s%s",
+                address.getStreet(),
+                address.getNumber(),
+                address.getNeighborhood(),
+                address.getCep(),
+                address.getComplement() != null
+                        ? String.format(" (%s)", address.getComplement())
+                        : ""
+        );
     }
 }

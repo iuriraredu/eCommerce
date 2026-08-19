@@ -1,57 +1,90 @@
 package br.com.iuriraredu.ecommerce.service;
 
+import br.com.iuriraredu.ecommerce.dto.ClientRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.ClientResponseDTO;
+import br.com.iuriraredu.ecommerce.entity.Address;
 import br.com.iuriraredu.ecommerce.entity.Client;
+import br.com.iuriraredu.ecommerce.entity.Phone;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ClientService {
 
     private final ClientRepository clientRepository;
 
+    @Transactional
     @CacheEvict(value = "clients", allEntries = true)
-    public Client create(Client client) {
-        if (client.getAddresses() != null)
-            client.getAddresses().forEach(address -> address.setClient(client));
+    public ClientResponseDTO create(ClientRequestDTO dto) {
+        Client client = new Client();
+        client.setName(dto.name());
+        client.setEmail(dto.email());
+        client.setCpf(dto.cpf());
 
-        if (client.getPhones() != null)
-            client.getPhones().forEach(phone -> phone.setClient(client));
+        if (dto.addresses() != null) {
+            List<Address> addresses = dto.addresses().stream().map(a -> {
+                Address address = a.toEntity();
+                address.setClient(client);
+                return address;
+            }).toList();
+            client.setAddresses(addresses);
+        }
 
-        return clientRepository.save(client);
+        if (dto.phones() != null) {
+            List<Phone> phones = dto.phones().stream().map(p -> {
+                Phone phone = p.toEntity();
+                phone.setClient(client);
+                return phone;
+            }).toList();
+            client.setPhones(phones);
+        }
+
+        return ClientResponseDTO.fromEntity(clientRepository.save(client));
     }
 
     @Cacheable(value = "clients")
-    public List<Client> getAll() {
-        return clientRepository.findAll();
+    public List<ClientResponseDTO> getAll() {
+        return clientRepository.findAll().stream()
+                .map(ClientResponseDTO::fromEntity)
+                .toList();
     }
 
     @Cacheable(value = "clients", key = "#id")
-    public Client findById(Long id) {
-        return clientRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + id));
+    public ClientResponseDTO findById(Long id) {
+        return ClientResponseDTO.fromEntity(findEntityById(id));
     }
 
+    @Transactional
     @CacheEvict(value = "clients", allEntries = true)
-    public Client update(Long id, Client updatedClient) {
-        Client client = findById(id);
-        client.setName(updatedClient.getName());
-        client.setCpf(updatedClient.getCpf());
-        return clientRepository.save(client);
+    public ClientResponseDTO update(Long id, ClientRequestDTO dto) {
+        Client client = findEntityById(id);
+        client.setName(dto.name());
+        client.setEmail(dto.email());
+        client.setCpf(dto.cpf());
+        return ClientResponseDTO.fromEntity(clientRepository.save(client));
     }
 
+    @Transactional
     @CacheEvict(value = "clients", allEntries = true)
     public void delete(Long id) {
         if (!clientRepository.existsById(id)) {
             throw new ResourceNotFoundException("Client not found with id: " + id);
         }
         clientRepository.deleteById(id);
+    }
+
+    // Uso interno (ex.: OrderService) quando é preciso a entidade gerenciada, não o DTO.
+    Client findEntityById(Long id) {
+        return clientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + id));
     }
 }

@@ -54,4 +54,18 @@ public class AuthController {
         authService.register(data);
         return ResponseEntity.status(CREATED).build();
     }
+
+    @PostMapping(value = "/register/admin", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Registrar novo usuário com role customizada (restrito a administradores)",
+            description = "Cadastra um novo usuário respeitando a role informada no corpo da requisição. Diferente de /auth/register, este endpoint exige autenticação com ROLE_ADMIN."
+    )
+    @ApiResponse(responseCode = "201", description = "Usuário registrado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos ou e-mail já cadastrado")
+    @ApiResponse(responseCode = "401", description = "Não autenticado")
+    @ApiResponse(responseCode = "403", description = "Autenticado, mas sem permissão de administrador")
+    public ResponseEntity<Void> registerWithRole(@RequestBody @Valid RegisterDTO data) {
+        authService.registerWithRole(data);
+        return ResponseEntity.status(CREATED).build();
+    }
 }

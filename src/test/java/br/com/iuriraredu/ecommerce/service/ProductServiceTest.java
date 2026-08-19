@@ -1,5 +1,7 @@
 package br.com.iuriraredu.ecommerce.service;
 
+import br.com.iuriraredu.ecommerce.dto.ProductRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.ProductResponseDTO;
 import br.com.iuriraredu.ecommerce.entity.Product;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ProductRepository;
@@ -38,19 +40,22 @@ class ProductServiceTest {
     @DisplayName("Should create product successfully")
     void createProductSuccess() {
         // Arrange
-        Product product = new Product();
-        product.setName("Vinyl Record");
-        product.setPrice(BigDecimal.valueOf(120.00));
+        ProductRequestDTO dto = new ProductRequestDTO("Vinyl Record", "A record", BigDecimal.valueOf(120.00), 10, true);
 
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        Product savedProduct = new Product();
+        savedProduct.setId(1L);
+        savedProduct.setName("Vinyl Record");
+        savedProduct.setPrice(BigDecimal.valueOf(120.00));
+
+        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
         // Act
-        Product createdProduct = productService.create(product);
+        ProductResponseDTO createdProduct = productService.create(dto);
 
         // Assert
         assertNotNull(createdProduct);
-        assertEquals("Vinyl Record", createdProduct.getName());
-        verify(productRepository, times(1)).save(product);
+        assertEquals("Vinyl Record", createdProduct.name());
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
@@ -61,7 +66,7 @@ class ProductServiceTest {
         when(productRepository.findAll()).thenReturn(products);
 
         // Act
-        List<Product> result = productService.getAll();
+        List<ProductResponseDTO> result = productService.getAll();
 
         // Assert
         assertEquals(2, result.size());
@@ -79,11 +84,11 @@ class ProductServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         // Act
-        Product result = productService.findById(productId);
+        ProductResponseDTO result = productService.findById(productId);
 
         // Assert
         assertNotNull(result);
-        assertEquals(productId, result.getId());
+        assertEquals(productId, result.id());
         verify(productRepository, times(1)).findById(productId);
     }
 
@@ -112,19 +117,17 @@ class ProductServiceTest {
         existingProduct.setId(productId);
         existingProduct.setName("Old Name");
 
-        Product updatedData = new Product();
-        updatedData.setName("Updated Product Name");
-        updatedData.setPrice(BigDecimal.valueOf(150.00));
+        ProductRequestDTO updatedData = new ProductRequestDTO("Updated Product Name", "desc", BigDecimal.valueOf(150.00), 5, true);
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenReturn(existingProduct);
 
         // Act
-        Product result = productService.update(productId, updatedData);
+        ProductResponseDTO result = productService.update(productId, updatedData);
 
         // Assert
         assertNotNull(result);
-        assertEquals("Updated Product Name", result.getName());
+        assertEquals("Updated Product Name", result.name());
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, times(1)).save(existingProduct);
     }
@@ -134,7 +137,7 @@ class ProductServiceTest {
     void updateProductNotFound() {
         // Arrange
         Long productId = 99L;
-        Product updatedData = new Product();
+        ProductRequestDTO updatedData = new ProductRequestDTO("Name", "desc", BigDecimal.TEN, 1, true);
 
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 

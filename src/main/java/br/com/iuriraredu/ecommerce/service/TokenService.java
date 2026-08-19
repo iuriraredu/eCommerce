@@ -9,15 +9,14 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
-import static java.lang.System.*;
-import static java.nio.charset.StandardCharsets.*;
+import static java.lang.System.currentTimeMillis;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 public class TokenService {
-    @Value("${api.security.token.secret:my-secret-key-very-secure-ecommerce-iuri}")
+    @Value("${api.security.token.secret}")
     private String secret;
 
-    // Gera o token JWT com validade de 2 horas
     public String generateToken(User user) {
         try {
             SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(UTF_8));

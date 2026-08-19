@@ -1,9 +1,11 @@
 package br.com.iuriraredu.ecommerce.service;
 
+import br.com.iuriraredu.ecommerce.dto.OrderItemRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.OrderRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.OrderResponseDTO;
 import br.com.iuriraredu.ecommerce.entity.Address;
 import br.com.iuriraredu.ecommerce.entity.Client;
 import br.com.iuriraredu.ecommerce.entity.Order;
-import br.com.iuriraredu.ecommerce.entity.OrderItem;
 import br.com.iuriraredu.ecommerce.entity.Product;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
@@ -12,6 +14,7 @@ import br.com.iuriraredu.ecommerce.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -71,28 +74,21 @@ class OrderServiceTest {
         product.setId(productId);
         product.setPrice(BigDecimal.valueOf(150.00));
 
-        OrderItem item = new OrderItem();
-        item.setProduct(product);
-        item.setQuantity(2);
-
-        Order order = new Order();
-        order.setClient(client);
-        order.setDeliveryAddressId(addressId);
-        order.setItems(List.of(item));
+        OrderRequestDTO dto = new OrderRequestDTO(clientId, addressId, List.of(new OrderItemRequestDTO(productId, 2)));
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        Order createdOrder = orderService.create(order);
+        OrderResponseDTO createdOrder = orderService.create(dto);
 
         // Assert
         assertNotNull(createdOrder);
-        assertEquals("123.456.789-00", createdOrder.getClientDocumentSnapshot());
-        assertTrue(createdOrder.getDeliveryAddressSnapshot().contains("Av. Paulista, 1000"));
-        assertEquals(BigDecimal.valueOf(150.00), item.getSoldPrice());
-        verify(orderRepository, times(1)).save(order);
+        assertEquals("123.456.789-00", createdOrder.clientDocumentSnapshot());
+        assertTrue(createdOrder.deliveryAddressSnapshot().contains("Av. Paulista, 1000"));
+        assertEquals(BigDecimal.valueOf(150.00), createdOrder.items().get(0).soldPrice());
+        verify(orderRepository, times(1)).save(any(Order.class));
     }
 
     @Test
@@ -100,17 +96,13 @@ class OrderServiceTest {
     void createOrderClientNotFound() {
         // Arrange
         Long clientId = 99L;
-        Client client = new Client();
-        client.setId(clientId);
-
-        Order order = new Order();
-        order.setClient(client);
+        OrderRequestDTO dto = new OrderRequestDTO(clientId, 1L, List.of(new OrderItemRequestDTO(1L, 1)));
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
         // Act & Assert
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            orderService.create(order);
+            orderService.create(dto);
         });
 
         assertEquals("Client not found!", exception.getMessage());
@@ -121,11 +113,17 @@ class OrderServiceTest {
     @DisplayName("Should return all orders")
     void getAllOrdersSuccess() {
         // Arrange
-        List<Order> orders = List.of(new Order(), new Order());
-        when(orderRepository.findAll()).thenReturn(orders);
+        Order order1 = new Order();
+        order1.setClient(new Client());
+        order1.setItems(List.of());
+        Order order2 = new Order();
+        order2.setClient(new Client());
+        order2.setItems(List.of());
+
+        when(orderRepository.findAll()).thenReturn(List.of(order1, order2));
 
         // Act
-        List<Order> result = orderService.getAll();
+        List<OrderResponseDTO> result = orderService.getAll();
 
         // Assert
         assertEquals(2, result.size());
@@ -140,16 +138,18 @@ class OrderServiceTest {
         Order order = new Order();
         order.setId(orderId);
         order.setStatus(WAITING_FOR_PAYMENT);
+        order.setClient(new Client());
+        order.setItems(List.of());
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         // Act
-        Order result = orderService.updateStatus(orderId, PAID);
+        OrderResponseDTO result = orderService.updateStatus(orderId, PAID);
 
         // Assert
         assertNotNull(result);
-        assertEquals(PAID, result.getStatus());
+        assertEquals(PAID, result.status());
         verify(orderRepository, times(1)).findById(orderId);
         verify(orderRepository, times(1)).save(order);
     }

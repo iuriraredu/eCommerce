@@ -1,11 +1,13 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Order;
+import br.com.iuriraredu.ecommerce.dto.OrderRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.OrderResponseDTO;
 import br.com.iuriraredu.ecommerce.entity.enums.OrderStatus;
 import br.com.iuriraredu.ecommerce.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,22 +37,19 @@ public class OrderController {
     )
     @ApiResponse(responseCode = "201", description = "Pedido criado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a criação do pedido")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Order> create(@RequestBody Order order) {
-        Order createdOrder = orderService.create(order);
+    @ApiResponse(responseCode = "404", description = "Cliente, endereço ou produto informado não encontrado")
+    public ResponseEntity<OrderResponseDTO> create(@RequestBody @Valid OrderRequestDTO dto) {
+        OrderResponseDTO createdOrder = orderService.create(dto);
         return ResponseEntity.status(CREATED).body(createdOrder);
     }
 
-    @GetMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar todos os pedidos",
             description = "Retorna uma lista contendo todos os pedidos realizados no sistema."
     )
     @ApiResponse(responseCode = "200", description = "Lista de pedidos retornada com sucesso")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public List<Order> getAll() {
+    public List<OrderResponseDTO> getAll() {
         return orderService.getAll();
     }
 
@@ -62,9 +61,7 @@ public class OrderController {
     @ApiResponse(responseCode = "200", description = "Status do pedido atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Status inválido ou dados incorretos")
     @ApiResponse(responseCode = "404", description = "Pedido não encontrado para o ID informado")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
+    public ResponseEntity<OrderResponseDTO> updateStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
         return ResponseEntity.ok(orderService.updateStatus(id, newStatus));
     }
 }

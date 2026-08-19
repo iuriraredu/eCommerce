@@ -1,8 +1,17 @@
 package br.com.iuriraredu.ecommerce.entity;
 
 import br.com.iuriraredu.ecommerce.entity.enums.UserRole;
-import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +23,10 @@ import static br.com.iuriraredu.ecommerce.entity.enums.UserRole.ADMIN;
 import static br.com.iuriraredu.ecommerce.entity.enums.UserRole.USER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = "password")
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {

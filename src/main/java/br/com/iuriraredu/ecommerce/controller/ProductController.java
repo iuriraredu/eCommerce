@@ -1,10 +1,12 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Product;
+import br.com.iuriraredu.ecommerce.dto.ProductRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.ProductResponseDTO;
 import br.com.iuriraredu.ecommerce.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,35 +40,33 @@ public class ProductController {
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para o cadastro do produto")
     @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
     @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Product> create(@RequestBody Product product) {
-        Product createdProduct = productService.create(product);
-        return ResponseEntity.status(CREATED).body(createdProduct);
+    public ResponseEntity<ProductResponseDTO> create(@RequestBody @Valid ProductRequestDTO dto) {
+        ProductResponseDTO created = productService.create(dto);
+        return ResponseEntity.status(CREATED).body(created);
     }
 
-    @GetMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar todos os produtos",
             description = "Retorna uma lista contendo todos os produtos cadastrados atualmente no sistema."
     )
     @ApiResponse(responseCode = "200", description = "Lista de produtos retornada com sucesso")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public List<Product> getAll() {
+    public List<ProductResponseDTO> getAll() {
         return productService.getAll();
     }
 
-    @GetMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Buscar produto por ID",
             description = "Retorna os detalhes de um produto específico com base no ID informado na URL."
     )
     @ApiResponse(responseCode = "200", description = "Produto encontrado com sucesso")
     @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
-    public ResponseEntity<Product> findById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.findById(id));
     }
 
-    @PutMapping(value = "/{id}",consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Atualizar produto por ID",
             description = "Atualiza os detalhes de um produto específico com base no ID informado na URL e retorna o produto atualizado."
@@ -74,21 +74,17 @@ public class ProductController {
     @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a atualização")
     @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product updatedProduct) {
-        return ResponseEntity.ok(productService.update(id, updatedProduct));
+    public ResponseEntity<ProductResponseDTO> update(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO dto) {
+        return ResponseEntity.ok(productService.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{id}")
     @Operation(
             summary = "Deletar produto",
             description = "Remove um produto do sistema com base no ID informado na URL. Retorna status sem conteúdo em caso de sucesso."
     )
     @ApiResponse(responseCode = "204", description = "Produto deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Produto não encontrado para o ID informado")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();

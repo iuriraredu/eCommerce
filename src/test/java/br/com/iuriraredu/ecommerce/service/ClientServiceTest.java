@@ -1,13 +1,16 @@
 package br.com.iuriraredu.ecommerce.service;
 
-import br.com.iuriraredu.ecommerce.entity.Address;
+import br.com.iuriraredu.ecommerce.dto.AddressDTO;
+import br.com.iuriraredu.ecommerce.dto.ClientRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.ClientResponseDTO;
+import br.com.iuriraredu.ecommerce.dto.PhoneDTO;
 import br.com.iuriraredu.ecommerce.entity.Client;
-import br.com.iuriraredu.ecommerce.entity.Phone;
 import br.com.iuriraredu.ecommerce.exception.ResourceNotFoundException;
 import br.com.iuriraredu.ecommerce.repository.ClientRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,27 +42,24 @@ class ClientServiceTest {
     @DisplayName("Should create client successfully and associate addresses and phones")
     void createClientSuccess() {
         // Arrange
-        Client client = new Client();
-        client.setName("Iuri Ramos");
+        AddressDTO addressDTO = new AddressDTO(null, "Rua Teste", "100", null, "Centro", "00000-000");
+        PhoneDTO phoneDTO = new PhoneDTO(null, "11999999999");
+        ClientRequestDTO dto = new ClientRequestDTO("Iuri Ramos", "iuri@teste.com", "123.456.789-00", List.of(addressDTO), List.of(phoneDTO));
 
-        Address address = new Address();
-        address.setStreet("Rua Teste");
-        client.setAddresses(List.of(address));
-
-        Phone phone = new Phone();
-        phone.setNumber("11999999999");
-        client.setPhones(List.of(phone));
-
-        when(clientRepository.save(any(Client.class))).thenReturn(client);
+        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        Client createdClient = clientService.create(client);
+        ClientResponseDTO createdClient = clientService.create(dto);
 
         // Assert
+        ArgumentCaptor<Client> captor = ArgumentCaptor.forClass(Client.class);
+        verify(clientRepository, times(1)).save(captor.capture());
+        Client savedClient = captor.getValue();
+
         assertNotNull(createdClient);
-        assertEquals(client, address.getClient());
-        assertEquals(client, phone.getClient());
-        verify(clientRepository, times(1)).save(client);
+        assertEquals("Iuri Ramos", createdClient.name());
+        assertEquals(savedClient, savedClient.getAddresses().get(0).getClient());
+        assertEquals(savedClient, savedClient.getPhones().get(0).getClient());
     }
 
     @Test
@@ -70,7 +70,7 @@ class ClientServiceTest {
         when(clientRepository.findAll()).thenReturn(clients);
 
         // Act
-        List<Client> result = clientService.getAll();
+        List<ClientResponseDTO> result = clientService.getAll();
 
         // Assert
         assertEquals(2, result.size());
@@ -88,11 +88,11 @@ class ClientServiceTest {
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
 
         // Act
-        Client result = clientService.findById(clientId);
+        ClientResponseDTO result = clientService.findById(clientId);
 
         // Assert
         assertNotNull(result);
-        assertEquals(clientId, result.getId());
+        assertEquals(clientId, result.id());
         verify(clientRepository, times(1)).findById(clientId);
     }
 
@@ -121,19 +121,17 @@ class ClientServiceTest {
         existingClient.setId(clientId);
         existingClient.setName("Nome Antigo");
 
-        Client updatedData = new Client();
-        updatedData.setName("Nome Novo");
-        updatedData.setCpf("123.456.789-00");
+        ClientRequestDTO updatedData = new ClientRequestDTO("Nome Novo", "novo@teste.com", "123.456.789-00", null, null);
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
         when(clientRepository.save(any(Client.class))).thenReturn(existingClient);
 
         // Act
-        Client result = clientService.update(clientId, updatedData);
+        ClientResponseDTO result = clientService.update(clientId, updatedData);
 
         // Assert
         assertNotNull(result);
-        assertEquals("Nome Novo", result.getName());
+        assertEquals("Nome Novo", result.name());
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, times(1)).save(existingClient);
     }
@@ -143,7 +141,7 @@ class ClientServiceTest {
     void updateClientNotFound() {
         // Arrange
         Long clientId = 99L;
-        Client updatedData = new Client();
+        ClientRequestDTO updatedData = new ClientRequestDTO("Nome", "email@teste.com", "000.000.000-00", null, null);
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 

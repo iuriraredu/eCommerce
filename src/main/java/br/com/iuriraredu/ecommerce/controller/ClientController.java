@@ -1,10 +1,12 @@
 package br.com.iuriraredu.ecommerce.controller;
 
-import br.com.iuriraredu.ecommerce.entity.Client;
+import br.com.iuriraredu.ecommerce.dto.ClientRequestDTO;
+import br.com.iuriraredu.ecommerce.dto.ClientResponseDTO;
 import br.com.iuriraredu.ecommerce.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,35 +37,29 @@ public class ClientController {
     )
     @ApiResponse(responseCode = "201", description = "Cliente cadastrado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para o cadastro")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Client> create(@RequestBody Client client) {
-        Client savedClient = service.create(client);
+    public ResponseEntity<ClientResponseDTO> create(@RequestBody @Valid ClientRequestDTO dto) {
+        ClientResponseDTO savedClient = service.create(dto);
         return ResponseEntity.status(CREATED).body(savedClient);
     }
 
-    @GetMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Listar todos os clientes",
             description = "Retorna uma lista contendo todos os clientes cadastrados no sistema."
     )
     @ApiResponse(responseCode = "200", description = "Lista de clientes retornada com sucesso")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public List<Client> getAll() {
+    public List<ClientResponseDTO> getAll() {
         return service.getAll();
     }
 
-    @GetMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Buscar cliente por ID",
             description = "Retorna os detalhes de um cliente específico com base no ID informado na URL."
     )
     @ApiResponse(responseCode = "200", description = "Cliente encontrado com sucesso")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Client> findById(@PathVariable Long id) {
+    public ResponseEntity<ClientResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
@@ -75,21 +71,17 @@ public class ClientController {
     @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso")
     @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a atualização")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
-    public ResponseEntity<Client> update(@PathVariable Long id, @RequestBody Client client) {
-        return ResponseEntity.ok(service.update(id, client));
+    public ResponseEntity<ClientResponseDTO> update(@PathVariable Long id, @RequestBody @Valid ClientRequestDTO dto) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @DeleteMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{id}")
     @Operation(
             summary = "Deletar cliente",
             description = "Remove um cliente do sistema com base no ID informado na URL."
     )
     @ApiResponse(responseCode = "204", description = "Cliente deletado com sucesso")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    @ApiResponse(responseCode = "406", description = "'Accept' incorreto")
-    @ApiResponse(responseCode = "415", description = "'Content-Type' incorreto")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
