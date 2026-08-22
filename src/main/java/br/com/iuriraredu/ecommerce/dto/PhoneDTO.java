@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 public record PhoneDTO(
         Long id,
 
-        @NotBlank(message = "O número de telefone é obrigatório")
+        @NotBlank(message = "Phone number is required")
         String number
 ) {
     public static PhoneDTO fromEntity(Phone phone) {

@@ -9,10 +9,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,15 +31,15 @@ class AuthorizationServiceTest {
     @DisplayName("Should load user by username successfully when user exists")
     void loadByUsernameSuccess() {
         // Arrange
-        String login = "test@email.com";
-        User mockUser = new User();
+        final String login = "test@email.com";
+        final User mockUser = new User();
         mockUser.setLogin(login);
         mockUser.setPassword("encodedPassword");
 
         when(userRepository.findByLogin(login)).thenReturn(mockUser);
 
         // Act
-        UserDetails userDetails = authorizationService.loadUserByUsername(login);
+        final UserDetails userDetails = authorizationService.loadUserByUsername(login);
 
         // Assert
         assertNotNull(userDetails);
@@ -47,18 +48,21 @@ class AuthorizationServiceTest {
     }
 
     @Test
-    @DisplayName("Should return null or handle when user is not found")
+    @DisplayName("Should throw UsernameNotFoundException when user is not found")
     void loadByUsernameNotFound() {
         // Arrange
-        String login = "nonexistent@email.com";
+        final String login = "nonexistent@email.com";
         when(userRepository.findByLogin(login)).thenReturn(null);
 
-        // Act
-        UserDetails userDetails = authorizationService.loadUserByUsername(login);
+        // Act & Assert
+        // Spring Security expects either a UserDetails or this exception — never null.
+        // Returning null used to cause a confusing internal error instead of a clean 401.
+        final UsernameNotFoundException exception = assertThrows(
+                UsernameNotFoundException.class,
+                () -> authorizationService.loadUserByUsername(login)
+        );
 
-        // Assert
-        assertNull(userDetails);
+        assertEquals("User not found with login: " + login, exception.getMessage());
         verify(userRepository, times(1)).findByLogin(login);
     }
 }
-

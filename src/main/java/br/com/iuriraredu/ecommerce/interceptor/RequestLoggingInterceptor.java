@@ -21,11 +21,11 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    // Never log the full JWT token: it grants access for up to 2h to whoever reads the log.
     private String maskAuthorizationHeader(String authHeader) {
         if (authHeader == null) {
-            return "não informado";
+            return "not provided";
         }
-        return "presente (oculto)";
+        return "present (hidden)";
     }
 }
-

@@ -8,15 +8,14 @@ import java.util.List;
 
 public record OrderRequestDTO(
 
-        @NotNull(message = "O cliente é obrigatório")
+        @NotNull(message = "Client is required")
         Long clientId,
 
-        @NotNull(message = "O endereço de entrega é obrigatório")
+        @NotNull(message = "Delivery address is required")
         Long deliveryAddressId,
 
-        @NotEmpty(message = "O pedido precisa ter ao menos um item")
+        @NotEmpty(message = "The order must have at least one item")
         @Valid
         List<OrderItemRequestDTO> items
 ) {
 }
-

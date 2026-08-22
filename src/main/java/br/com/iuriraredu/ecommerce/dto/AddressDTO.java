@@ -6,18 +6,18 @@ import jakarta.validation.constraints.NotBlank;
 public record AddressDTO(
         Long id,
 
-        @NotBlank(message = "A rua é obrigatória")
+        @NotBlank(message = "Street is required")
         String street,
 
-        @NotBlank(message = "O número é obrigatório")
+        @NotBlank(message = "Number is required")
         String number,
 
         String complement,
 
-        @NotBlank(message = "O bairro é obrigatório")
+        @NotBlank(message = "Neighborhood is required")
         String neighborhood,
 
-        @NotBlank(message = "O CEP é obrigatório")
+        @NotBlank(message = "Zip code is required")
         String cep
 ) {
     public static AddressDTO fromEntity(Address address) {
@@ -31,7 +31,7 @@ public record AddressDTO(
         );
     }
 
-    // id é sempre ignorado aqui de propósito: endereço novo nunca deve nascer com id vindo do cliente da API.
+    // id is always ignored here on purpose: a new address should never be born with an id coming from the API client.
     public Address toEntity() {
         Address address = new Address();
         address.setStreet(street());
@@ -42,4 +42,3 @@ public record AddressDTO(
         return address;
     }
 }
-

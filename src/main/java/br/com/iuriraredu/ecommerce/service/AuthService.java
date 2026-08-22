@@ -11,10 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import static br.com.iuriraredu.ecommerce.entity.enums.UserRole.USER;
 
 @Service
 @RequiredArgsConstructor
@@ -25,32 +24,35 @@ public class AuthService {
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
 
-    public LoginResponseDTO login(AuthenticationDTO data) {
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-        Authentication auth = this.authenticationManager.authenticate(usernamePassword);
+    public LoginResponseDTO login(final AuthenticationDTO data) {
+        final UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
+        final Authentication auth = this.authenticationManager.authenticate(usernamePassword);
 
-        String token = tokenService.generateToken((User) auth.getPrincipal());
+        // The principal here is whatever AuthorizationService.loadUserByUsername returned —
+        // a UserDetailsImpl, not our User entity. TokenService only needs the UserDetails
+        // contract, so no cast to a concrete type (and no entity leakage) is needed.
+        final String token = tokenService.generateToken((UserDetails) auth.getPrincipal());
         return new LoginResponseDTO(token);
     }
 
-    // Endpoint público (/auth/register): ignora qualquer role vinda do corpo da requisição.
-    // Todo cadastro público nasce como USER — nunca confie em role enviada por quem ainda não está autenticado.
-    public void register(RegisterDTO data) {
-        createUser(data, USER);
+    // Public endpoint (/auth/register): ignores any role coming from the request body.
+    // Every public sign-up is born as USER — never trust a role sent by someone who isn't authenticated yet.
+    public void register(final RegisterDTO data) {
+        createUser(data, UserRole.USER);
     }
 
-    // Uso restrito a endpoint protegido por ROLE_ADMIN. Só aqui a role do corpo da requisição é respeitada.
-    public void registerWithRole(RegisterDTO data) {
+    // Restricted to the endpoint protected by ROLE_ADMIN. Only here is the role from the request body honored.
+    public void registerWithRole(final RegisterDTO data) {
         createUser(data, data.role());
     }
 
-    private void createUser(RegisterDTO data, UserRole role) {
-        if (this.userRepository.findByLogin(data.login()) != null) {
+    private void createUser(final RegisterDTO data, final UserRole role) {
+        if (this.userRepository.existsByLogin(data.login())) {
             throw new BusinessException("User already exists with this login!");
         }
 
-        String encryptedPassword = passwordEncoder.encode(data.password());
-        User user = new User();
+        final String encryptedPassword = passwordEncoder.encode(data.password());
+        final User user = new User();
         user.setLogin(data.login());
         user.setPassword(encryptedPassword);
         user.setRole(role);

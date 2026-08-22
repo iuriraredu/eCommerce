@@ -12,24 +12,19 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-
-import static br.com.iuriraredu.ecommerce.entity.enums.UserRole.ADMIN;
 import static br.com.iuriraredu.ecommerce.entity.enums.UserRole.USER;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
+// Pure persistence entity: knows nothing about Spring Security. See UserDetailsImpl for the
+// adapter that bridges this entity to the UserDetails contract.
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "password")
+@ToString(exclude = "password") // never let the password hash leak into logs/debug via toString
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
@@ -42,41 +37,4 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private UserRole role = USER;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return (this.role == ADMIN)
-                ? List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"))
-                : List.of(new SimpleGrantedAuthority("ROLE_USER"));
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.login;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

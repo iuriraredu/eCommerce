@@ -21,7 +21,9 @@ public class Phone {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+
     private String number;
+
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;

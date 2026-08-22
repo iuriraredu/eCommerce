@@ -1,6 +1,7 @@
 package br.com.iuriraredu.ecommerce.service;
 
 import br.com.iuriraredu.ecommerce.entity.User;
+import br.com.iuriraredu.ecommerce.security.UserDetailsImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +26,13 @@ class TokenServiceTest {
     @DisplayName("Should generate valid JWT token and validate it successfully")
     void generateAndValidateTokenSuccess() {
         // Arrange
-        User user = new User();
+        final User user = new User();
         user.setLogin("iuri@email.com");
+        final UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
         // Act
-        String token = tokenService.generateToken(user);
-        String subject = tokenService.validateToken(token);
+        final String token = tokenService.generateToken(userDetails);
+        final String subject = tokenService.validateToken(token);
 
         // Assert
         assertNotNull(token);
@@ -42,10 +44,10 @@ class TokenServiceTest {
     @DisplayName("Should return empty string when validating invalid or malformed token")
     void validateInvalidTokenReturnsEmpty() {
         // Arrange
-        String invalidToken = "invalid.jwt.token.string";
+        final String invalidToken = "invalid.jwt.token.string";
 
         // Act
-        String subject = tokenService.validateToken(invalidToken);
+        final String subject = tokenService.validateToken(invalidToken);
 
         // Assert
         assertNotNull(subject);

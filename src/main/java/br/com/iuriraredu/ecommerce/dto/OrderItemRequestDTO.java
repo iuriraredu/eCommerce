@@ -5,12 +5,11 @@ import jakarta.validation.constraints.Positive;
 
 public record OrderItemRequestDTO(
 
-        @NotNull(message = "O produto é obrigatório")
+        @NotNull(message = "Product is required")
         Long productId,
 
-        @NotNull(message = "A quantidade é obrigatória")
-        @Positive(message = "A quantidade deve ser maior que zero")
+        @NotNull(message = "Quantity is required")
+        @Positive(message = "Quantity must be greater than zero")
         Integer quantity
 ) {
 }
-

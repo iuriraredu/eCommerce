@@ -21,69 +21,71 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/clients")
 @RequiredArgsConstructor
-@Tag(name = "Cliente", description = "Gerenciamento de clientes (Cadastra, Busca, Atualiza e Deleta clientes).")
+@Tag(name = "Client", description = "Client management (Create, Read, Update and Delete clients).")
 public class ClientController {
-    private final ClientService service;
+    private final ClientService clientService;
 
-    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping
     @Operation(
-            summary = "Cadastrar novo cliente",
-            description = "Cadastra um novo cliente no sistema utilizando os dados fornecidos no corpo da requisição e retorna o cliente criado com status 201 Created."
+            summary = "Register a new client",
+            description = "Registers a new client using the data provided in the request body and returns the created client with a 201 Created status."
     )
-    @ApiResponse(responseCode = "201", description = "Cliente cadastrado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para o cadastro")
-    public ResponseEntity<ClientResponseDTO> create(@RequestBody @Valid ClientRequestDTO dto) {
-        ClientResponseDTO savedClient = service.create(dto);
+    @ApiResponse(responseCode = "201", description = "Client registered successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid data provided for registration")
+    public ResponseEntity<ClientResponseDTO> createClient(
+            @RequestBody @Valid final ClientRequestDTO clientRequestDto) {
+        ClientResponseDTO savedClient = clientService.createClient(clientRequestDto);
         return ResponseEntity.status(CREATED).body(savedClient);
     }
 
-    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    @GetMapping
     @Operation(
-            summary = "Listar todos os clientes",
-            description = "Retorna uma lista contendo todos os clientes cadastrados no sistema."
+            summary = "List all clients",
+            description = "Returns a list containing all clients registered in the system."
     )
-    @ApiResponse(responseCode = "200", description = "Lista de clientes retornada com sucesso")
-    public List<ClientResponseDTO> getAll() {
-        return service.getAll();
+    @ApiResponse(responseCode = "200", description = "List of clients returned successfully")
+    public List<ClientResponseDTO> getAllClients() {
+        return clientService.getAllClients();
     }
 
-    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
+    @GetMapping("/{id}")
     @Operation(
-            summary = "Buscar cliente por ID",
-            description = "Retorna os detalhes de um cliente específico com base no ID informado na URL."
+            summary = "Find client by ID",
+            description = "Returns the details of a specific client based on the ID provided in the URL."
     )
-    @ApiResponse(responseCode = "200", description = "Cliente encontrado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    public ResponseEntity<ClientResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    @ApiResponse(responseCode = "200", description = "Client found successfully")
+    @ApiResponse(responseCode = "404", description = "Client not found for the given ID")
+    public ResponseEntity<ClientResponseDTO> findClientById(@PathVariable final Long idClient) {
+        return ResponseEntity.ok(clientService.findClientById(idClient));
     }
 
-    @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PutMapping("/{id}")
     @Operation(
-            summary = "Atualizar cliente",
-            description = "Atualiza os dados cadastrais de um cliente existente com base no ID informado e nos novos dados fornecidos no corpo da requisição."
+            summary = "Update client",
+            description = "Updates the registration data of an existing client based on the given ID and the new data provided in the request body."
     )
-    @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a atualização")
-    @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    public ResponseEntity<ClientResponseDTO> update(@PathVariable Long id, @RequestBody @Valid ClientRequestDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+    @ApiResponse(responseCode = "200", description = "Client updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid data provided for the update")
+    @ApiResponse(responseCode = "404", description = "Client not found for the given ID")
+    public ResponseEntity<ClientResponseDTO> updateClient(
+            @PathVariable final Long idCliente,
+            @RequestBody @Valid final ClientRequestDTO clientRequestDTO) {
+        return ResponseEntity.ok(clientService.updateClient(idCliente, clientRequestDTO));
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping("/{id}")
     @Operation(
-            summary = "Deletar cliente",
-            description = "Remove um cliente do sistema com base no ID informado na URL."
+            summary = "Delete client",
+            description = "Removes a client from the system based on the ID provided in the URL."
     )
-    @ApiResponse(responseCode = "204", description = "Cliente deletado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o ID informado")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+    @ApiResponse(responseCode = "204", description = "Client deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Client not found for the given ID")
+    public ResponseEntity<Void> deleteClient(@PathVariable final Long idClient) {
+        clientService.deleteClient(idClient);
         return ResponseEntity.noContent().build();
     }
 }

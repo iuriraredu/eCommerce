@@ -14,6 +14,9 @@ import java.util.List;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
+// We swapped @Data for @Getter/@Setter + equals/hashCode based on id only:
+// with a bidirectional relationship (addresses, phones), @Data's "everything" equals/hashCode/toString
+// enters infinite recursion (Client -> addresses -> Address.client -> Client -> ...).
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")

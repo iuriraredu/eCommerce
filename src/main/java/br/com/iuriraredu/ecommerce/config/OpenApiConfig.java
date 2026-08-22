@@ -19,9 +19,9 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("API de E-commerce - Projeto Academico")
+                        .title("E-commerce API - Academic Project")
                         .version("v1.0")
-                        .description("API REST desenvolvida para estudos em Spring Boot 21 para gerenciamento de produtos, clientes, pedidos e autenticação JWT.")
+                        .description("REST API built for studying Spring Boot 21, covering product, client, and order management plus JWT authentication.")
                         .contact(new Contact()
                                 .name("Iuri Ramos Reducino")
                                 .email("iuri.ramos.reducino@gmail.com")))

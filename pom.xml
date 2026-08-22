@@ -17,13 +17,15 @@
     <artifactId>ecommerce</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>ecommerce</name>
-    <description>Projeto de estudo de uma API de e-commerce com Spring Boot.</description>
+    <description>Academic study project for an e-commerce REST API with Spring Boot.</description>
 
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springdoc.version>2.5.0</springdoc.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
 
     <dependencies>
@@ -32,6 +34,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Bean Validation (Jakarta Validation / Hibernate Validator).
+             CRITICAL: without this, @Valid on controllers compiles fine but silently does
+             nothing — there's no validation provider on the classpath to actually run the
+             @NotBlank/@Email/etc. checks. This starter also brings the built-in @CPF/@CNPJ
+             validators (org.hibernate.validator.constraints.br), used below. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
         <!-- Persistência com JPA/Hibernate -->
@@ -46,16 +58,34 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- Argon2PasswordEncoder (usado em SecurityConfigurations) depende do BouncyCastle em
+             tempo de execução, mas o spring-security-crypto NÃO traz isso como dependência
+             transitiva — precisa ser declarado explicitamente, senão o encode() lança
+             NoClassDefFoundError na primeira vez que for chamado de verdade (não em testes
+             unitários com Mockito, porque ali o encoder é mockado e nunca executa de fato). -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.85.2</version>
+        </dependency>
+
         <!-- Cache -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
-        <!-- Banco de dados em memória para desenvolvimento -->
+        <!-- Banco de dados em memória para desenvolvimento local (profile "local") -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Driver do banco real para produção (profile "prod") -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
@@ -64,6 +94,14 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- MapStruct: gera implementações de mapeamento DTO <-> Entity em tempo de compilação
+             (zero custo de reflection), em vez de código "de-para" manual espalhado pelos services. -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
         </dependency>
 
         <!-- Documentação OpenAPI/Swagger -->
@@ -105,6 +143,34 @@
 
     <build>
         <plugins>
+
+            <!-- Ordem explícita dos annotation processors: Lombok precisa rodar antes do MapStruct
+                 (para que os getters/setters gerados por @Getter/@Setter já existam quando o MapStruct
+                 gera as implementações dos mappers). lombok-mapstruct-binding é a "ponte" oficial
+                 recomendada pelos dois projetos para essa combinação funcionar sem conflito. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${lombok-mapstruct-binding.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
 
             <!-- Gera um JAR executável do Spring Boot -->
             <plugin>

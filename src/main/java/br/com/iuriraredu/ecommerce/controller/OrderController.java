@@ -21,47 +21,46 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
-@Tag(name = "Pedido", description = "Gerenciamento de pedidos de produtos (Criar, Listar e Atualizar pedidos).")
+@Tag(name = "Order", description = "Product order management (Create, List and Update orders).")
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping
     @Operation(
-            summary = "Criar novo pedido",
-            description = "Registra um novo pedido no sistema com base nos dados fornecidos no corpo da requisição e retorna o pedido criado com status 201 Created."
+            summary = "Create new order",
+            description = "Registers a new order in the system using the data provided in the request body and returns the created order with a 201 Created status."
     )
-    @ApiResponse(responseCode = "201", description = "Pedido criado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos para a criação do pedido")
-    @ApiResponse(responseCode = "404", description = "Cliente, endereço ou produto informado não encontrado")
-    public ResponseEntity<OrderResponseDTO> create(@RequestBody @Valid OrderRequestDTO dto) {
+    @ApiResponse(responseCode = "201", description = "Order created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid data provided for order creation")
+    @ApiResponse(responseCode = "404", description = "Client, address, or product provided was not found")
+    public ResponseEntity<OrderResponseDTO> create(@RequestBody @Valid final OrderRequestDTO dto) {
         OrderResponseDTO createdOrder = orderService.create(dto);
         return ResponseEntity.status(CREATED).body(createdOrder);
     }
 
-    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    @GetMapping
     @Operation(
-            summary = "Listar todos os pedidos",
-            description = "Retorna uma lista contendo todos os pedidos realizados no sistema."
+            summary = "List all orders",
+            description = "Returns a list containing all orders placed in the system."
     )
-    @ApiResponse(responseCode = "200", description = "Lista de pedidos retornada com sucesso")
+    @ApiResponse(responseCode = "200", description = "List of orders returned successfully")
     public List<OrderResponseDTO> getAll() {
         return orderService.getAll();
     }
 
-    @PatchMapping(value = "/{id}/status", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PatchMapping("/{id}/status")
     @Operation(
-            summary = "Atualizar status do pedido",
-            description = "Atualiza parcialmente o status de um pedido específico com base no ID fornecido na URL e no novo status enviado no corpo da requisição."
+            summary = "Update order status",
+            description = "Partially updates the status of a specific order based on the ID provided in the URL and the new status sent in the request body."
     )
-    @ApiResponse(responseCode = "200", description = "Status do pedido atualizado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Status inválido ou dados incorretos")
-    @ApiResponse(responseCode = "404", description = "Pedido não encontrado para o ID informado")
-    public ResponseEntity<OrderResponseDTO> updateStatus(@PathVariable Long id, @RequestBody OrderStatus newStatus) {
+    @ApiResponse(responseCode = "200", description = "Order status updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid status or incorrect data")
+    @ApiResponse(responseCode = "404", description = "Order not found for the given ID")
+    public ResponseEntity<OrderResponseDTO> updateStatus(@PathVariable final Long id, @RequestBody final OrderStatus newStatus) {
         return ResponseEntity.ok(orderService.updateStatus(id, newStatus));
     }
 }
